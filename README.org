@@ -1,0 +1,231 @@
+#+STARTUP: noindent
+
+* My Emacs configuration
+
+** The Past
+
+   Hello, this is my customized Emacs configuration. I started my Emacs journey 20 years ago with a hacked and copy pasted emacs
+   configuration from all sorts of places on the web and especially on comp.gnu.emacs. I used that for close to 10 years and then I
+   found [[https://github.com/bbatsov/prelude][Emacs Prelude]]. I fell in love with Prelude and used it for many many years (~10 years). I never fully understood what was
+   inside prelude, but I used it.
+
+   There were some inconveniences such as having "C-a" work in a terminal inside emacs, but by and large, I got ok with it. Things
+   changed when I tried to enable LSP and DAP and while this was supported (during later versions), I was never fully happy with
+   it. Regardless this was still one of the productive times for Emacs - where I didn't have to keep on tinkering with it.
+
+   Then I saw spacemacs and I thought it was very well configured - I started using that and really liked the well tested out
+   integration of various modes. I hated the evil mode centered build though. And the fact that every key binding was 10 chars long. In
+   addition, it kept getting slower and slower for me. I figured out this was time for me to get started with my own configuration.
+
+** The Present
+
+   I then found out about `use-package` and I know I must have been living under a rock for not having heard about it. Nevertheless I
+   found out about it and suddenly emacs configuration didn't need to be spread out over multiple files. I could keep it nice and
+   organized and keep all the related configuration to one mode together in one file. I could also split it across multiple files, but
+   one file was good enough.
+
+   Suddenly emacs became extremely snappy even without native compilation and it became a pleasure to use again. As a comparison, my
+   startup time was reduced 10x (from ~30+ seconds to ~3.15 seconds). Yes some of it is not as nice as spacemacs, but it is good enough
+   for me and hey that's what matters.
+
+   The rest of the file broadly outlines my configuration - this is more for my memory, so I remember my design decisions. If it helps
+   anyone else that is in a similar position as me, that's a bonus.
+
+** Structure of Emacs configuration.
+
+   All of the configuration is in one file `init.el` and that's kept on a github repo so I can version control it. Easy as pie. I have
+   created another custom-file just to make my favorite theme safe. Other than that I don't expect anything else to be in it. Any
+   configuration must come from elisp in the init.el file - or at least that's the goal.
+
+
+*** Structure of `init.el` file.
+
+    There are 4 key sections of the file.
+    1. Enable the package manager and bootstrap use-package
+    2. Enable the benchmarking tool.
+    3. Setup some sane defaults for Emacs
+    4. Enable other packages.
+
+    These are described below.
+
+
+*** Setting up the package manager and bootstrapping use-package.
+
+    This is done through the most basic steps listed below.
+
+    #+begin_src elisp
+    (setq package-enable-at-startup nil)
+    (setq package-archives '(("gnu" . "http://mirrors.163.com/elpa/gnu/")
+                             ("melpa" . "https://melpa.org/packages/")
+                             ("org" . "http://orgmode.org/elpa/")))
+
+    ;; Bootstrap 'use-package
+    (unless (package-installed-p 'use-package)
+      (package-refresh-contents)
+      (package-install 'use-package)
+      (eval-when-compile (require 'use-package)))
+    (setq use-package-always-ensure t)
+    #+end_src
+
+*** Setting up benchmarking
+
+    The code below does the benchmarking.
+
+    #+begin_src elisp
+    (use-package benchmark-init
+      :config
+      ;; To disable collection of benchmark data after init is done.
+      (add-hook 'after-init-hook 'benchmark-init/deactivate))
+
+    (add-hook 'after-init-hook
+              (lambda () (message "loaded in %s" (emacs-init-time))))
+    #+end_src
+
+*** Sane Defaults
+
+    Here are the key sane defaults.
+
+
+**** No littering
+
+     By default, the .emacs.d folder looks like a total mess. I am using the `no-littering` package to keep it clean. The way to do
+     this is shown below. This could be made better I am sure, but for the time being this works.
+
+     #+begin_src elisp
+     ;; Don't litter my .emacs.d
+     (use-package no-littering               ; Keep .emacs.d clean
+       :ensure t
+       :config
+       (require 'recentf)
+       (add-to-list 'recentf-exclude no-littering-var-directory)
+       (add-to-list 'recentf-exclude no-littering-etc-directory))
+
+     #+end_src
+
+     Based on my limited experience so far, this seems to be working well.
+
+**** Other Misc.
+
+     Notable things here are
+     1. Increase teh GC threshold to 100MB. I have a machine with 16MB RAM so I don't need to keep on doing GC collection and making
+        Emacs slow. Do it when only really needed.
+     2. Add a path to the custom elisp scripts - I am trying really hard to manage everything via use-package, but sometimes this is
+        added just in case.
+     3. Other misc settings such as - title for emacs, disabling lockfile, disabling indent mode, setting the name of the custom file,
+        disabling auto save, enabling recursive minibuffers, disabling toolbar, disabling a dialog box, enabling the hl mode to
+        highlight the current line, enabling better copy paste interaction with the OS, Enabling narrowing commands, enabling column
+        number in modeline, abbreviating yes-or-no questions, setting up meta and super keys, adding hook to delete trailing
+        whitespaces, unbinding some stupid default bindings and creating a custom key map. All of this is obvious in the code shown below.
+
+     #+begin_src elisp
+     (setq gc-cons-threshold (* 100 1024 1024))
+
+     ;; Restore after startup
+     (add-hook 'after-init-hook
+               (lambda ()
+                 (setq gc-cons-threshold (* 100 1024 1024))
+                 (message "gc-cons-threshold restored to %S"
+                          gc-cons-threshold)))
+
+     ;; Custom Elisp scripts
+     (add-to-list 'load-path "~/.emacs.d/lisp/")
+
+     ;; ===================================
+     ;; Emacs configuration
+     ;; ===================================
+     (setq-default
+      ;; If the .el file is newer than the .elc file, use the .el file
+      load-prefer-newer t
+      ;; Don't show the startup message
+      inhibit-startup-message t
+      ;; Set the fill column to 135
+      fill-column 135
+      ;; Set a more intuitive title for emacs
+      frame-title-format '("" "[%b] - Emacs " emacs-version)
+      ;; Do not create lockfile
+      create-lockfile nil
+      ;; Don't use hard tabs
+      indent-tabs-mode nil
+      custom-file "~/.emacs.d/custom-file.el"
+
+      ;; Do I want autosave - for the time being no.
+      auto-save-default nil
+      ;; Allow commands to be run on minibuffer
+      enable-recursive-minibuffers t)
+      ;; Emacs can automatically create backup files. This tells Emacs to put all backups in
+      ;; ~/.emacs.d/backups. More info:
+     ;; http://www.gnu.org/software/emacs/manual/html_node/elisp/Backup-Files.html
+     (setq backup-directory-alist '(("." . "~/.emacs.d/backup")))
+
+     ;; UI Hacks
+     ;; Don't show me the toolbar
+     (tool-bar-mode -1)
+     ;; Dont use dialog boxes -prompt in minibuffer.
+     (setq use-dialog-box nil)
+     ;; Enable global line highlight
+     (global-hl-line-mode t)
+
+     ;; X  clipboard interaction
+     (setq-default
+      ;; Makes killing/yanking interact with the clipboard.
+      x-select-enable-clipboard t
+      ;; To understand why this is done, read `X11 Copy & Paste to/from Emacs' section here:
+      ;; https://www.emacswiki.org/emacs/CopyAndPaste.
+      x-select-enable-primary t
+      ;; Save clipboard strings into kill ring before replacing them. When
+      ;; one selects something in another program to paste it into Emacs, but
+      ;; kills something in Emacs before actually pasting it, this selection
+      ;; is gone unless this variable is non-nil.
+      save-interprogram-paste-before-kill t
+      ;; Shows all options when running apropos. For more info,
+      ;; https://www.gnu.org/software/emacs/manual/html_node/emacs/Apropos.html.
+      apropos-do-all t
+
+      ;; Mouse yank commands yank at point instead of at click.
+      mouse-yank-at-point t)
+
+     ;; Other annoyances fixed
+     ;; Enable narrowing commands.
+     (put 'narrow-to-region 'disabled nil)
+     (put 'narrow-to-page 'disabled nil)
+     ;; Display column number in mode line.
+     (column-number-mode t)
+     ;; Automatically update buffers if file content on the disk has changed.
+     (global-auto-revert-mode t)
+     ;; Change all yes/no questions to y/n type
+     (fset 'yes-or-no-p 'y-or-n-p)
+     ;; Make the command key behave as 'meta'
+     (when (eq system-type 'darwin)
+       ;; Use my option key as meta and command key as hyper
+       (setq mac-option-modifier 'meta)
+       (setq mac-command-modifier 'super))
+
+     ;; Delete whitespace just when a file is saved.
+     (add-hook 'before-save-hook 'delete-trailing-whitespace)
+     ;; Disable commands that are not useful
+     (unbind-key "C-x C-d") ;; list-directory
+     (unbind-key "C-z") ;; suspend-frame
+     (unbind-key "M-o") ;; facemenu-mode
+     (setq require-final-newline t)
+     (setq enable-local-variables :all)
+     #+end_src
+
+
+*** Enabled modes
+
+**** Crux
+
+     [[https://github.com/bbatsov/crux][Crux]] stands for Collection of Ridiculously Useful Emacs extensions. It is a set of commonly used Emacs things that are useful. The
+     key methods that I use from this extension are below.
+
+     | Keyboard Shortcut | Method Name                 | Description                                              |
+     |-------------------+-----------------------------+----------------------------------------------------------|
+     | C-a               | crux-move-beginning-of-line | Jumps to the first non-space char in line. Useful.       |
+     | Cmd - ,           | crux-find-user-init-file    | Edit the init.el file. Matches the standard Mac keyboard |
+     | C-c o             | crux-open-with              | Open with registered app. Useful for Dired.              |
+     | C-c t             | crux-visit-term-buffer      | Useful for jumping to the term buffer.                   |
+     | Cmd - k           | crux-kill-whole-line        | Delete the whole line in Emacs. Vim's dd                 |
+
+**** Parenthesis and Programming
+
+     I enable `smartparens`, `rainbow-delimiters`, `rainbow-mode` and `goto-loast-change`.
