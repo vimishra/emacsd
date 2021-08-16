@@ -228,4 +228,91 @@
 
 **** Parenthesis and Programming
 
-     I enable `smartparens`, `rainbow-delimiters`, `rainbow-mode` and `goto-loast-change`.
+     I enable `smartparens`, `rainbow-delimiters`, `rainbow-mode` and `goto-last-change`.
+
+     Particularly useful is goto-last-change, this helps jump to the point of last change in the buffer.
+
+     | Keyboard Shortcut | Method Name      | Description                          |
+     |-------------------+------------------+--------------------------------------|
+     | C-;               | goto-last-change | Jump to the last change in the file. |
+
+
+**** Enable ivy, counsel and other related things.
+
+     Ivy is a fantastic completion framework and although I like helm a lot more than ivy, I think ivy is a lot faster.
+     Key things that are enabled for ivy are
+
+     1. Ivy
+     2. Ivy Rich - to provide rich formatting to ivy completion buffers.
+     3. Counsel - helpers for many things
+     4. Counsel-projectile - Counsel completion for projects
+     5. Ivy Hydra - for enabling hydra for ivy
+     6. Projectile - For project related things.
+
+     Keybindings in this are
+
+     | Keyboard Shortcut | Method Name                        | Description                                |
+     |-------------------+------------------------------------+--------------------------------------------|
+     | C-c C-r           | ivy-resume                         | Resume Ivy's last operation.               |
+     | C-s               | swiper                             | Search for things using swiper             |
+     | C-c s             | swiper-thing-at-point              | Search for thing at point using Swiper     |
+     |-------------------+------------------------------------+--------------------------------------------|
+     | C-x C-m           | counsel-M-x                        | Use ivy for M-x                            |
+     | C-c i             | counsel-imenu                      | Show counsel based imenu                   |
+     | C-x f             | counsel-find-file                  | Find file using Counsel.                   |
+     | C-c y             | counsel-yank-pop                   | Show the kill ring stack                   |
+     | C-c r             | counsel-recentf                    | Show the recent list of files uing counsel |
+     | C-c v             | counsel-switch-buffer-other-window | Switch buffer in the other window.         |
+     | C-h h             | counsel-command history            | Show command history.                      |
+     | C-r               | counsel-minibuffer-history         | Show counsel history when in minibuffer    |
+     |-------------------+------------------------------------+--------------------------------------------|
+     | C-c f             | counsel-projectile                 | Find file in current project               |
+     | C-c F             | counsel-projectile-switch-project  | Switch to another project using counsel    |
+     |-------------------+------------------------------------+--------------------------------------------|
+     | C-c p             |                                    | Projectile command map.                    |
+
+**** Theme
+
+     I really like tomorrow-night theme. Here it is
+
+     #+begin_src elisp
+     (setq custom-enabled-themes 'sanityinc-tomorrow-night)
+     (use-package color-theme-sanityinc-tomorrow
+       :ensure t)
+     #+end_src
+
+**** Beacon mode
+
+     Beacon mode shows the cursor when you switch to another window.
+
+     #+begin_src elisp
+     (use-package beacon
+       :config
+       (beacon-mode 1))
+     #+end_src
+
+**** Doom modeline
+
+     Use `doom-modeline` to make your modeline a lot more useful. I have enabled minor modes, but want to figure out how to replace
+     them with icons (like spacemacs.)
+     I guess that's something to be done.
+
+     #+begin_src elisp
+     ;; ;; Doom Modeline for a better looking modeline
+     ;; ;; More customization options can be determined from https://github.com/seagle0128/doom-modeline
+     (use-package doom-modeline
+       :ensure t
+       :init (doom-modeline-mode 1)
+       :config
+       (setq doom-modeline-lsp t)
+       (setq doom-modeline-minor-modes t)
+       (setq doom-modeline-continuous-word-count-modes '(markdown-mode gfm-mode org-mode))
+       ;; Whether display the buffer encoding.
+       (setq doom-modeline-buffer-encoding nil)
+       (setq doom-modeline-env-version t)
+       (setq doom-modeline-env-enable-python t))
+     #+end_src
+
+**** Better searching than grep using ag and ripgrep
+
+     Best grep replacement is `ripgrep` and it's best emacs extension is `deadgrep`. So in order

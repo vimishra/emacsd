@@ -270,7 +270,7 @@
 ;; Modeline, Theme and Icons
 ;; Modeline configuration
 ;; load color theme
-(setq custom-enabled-themes ''sanityinc-tomorrow-night)
+(setq custom-enabled-themes 'sanityinc-tomorrow-night)
 (use-package color-theme-sanityinc-tomorrow
   :ensure t)
 
@@ -357,16 +357,34 @@
   :bind ( "M-0" . treemacs-select-window)
   )
 
+
 (use-package company
   :ensure company-box
   :init
   (global-company-mode t)
   (global-set-key (kbd "M-/") 'company-complete)
-  ;; Complete quite soon
-  :custom
-  (company-minimum-prefix-length 3)
-  (company-idle-delay 0.1)
-  )
+
+  ;; (add-hook 'comint-mode-hook 'company-mode)
+  :config
+    (setq company-tooltip-limit 10)
+    (setq company-dabbrev-downcase 0)
+    (setq company-idle-delay 0.1)
+    (setq company-echo-delay 0.1)
+    (setq company-minimum-prefix-length 2)
+    (setq company-require-match nil)
+    (setq company-selection-wrap-around t)
+    (setq company-tooltip-align-annotations t)
+    (setq company-show-numbers t)
+    ;; (setq company-tooltip-flip-when-above t)
+    (setq company-transformers '(company-sort-by-occurrence)) ; weight by frequency
+    (define-key company-active-map (kbd "M-n") nil)
+    (define-key company-active-map (kbd "M-p") nil)
+    (define-key company-active-map (kbd "C-n") 'company-select-next)
+    (define-key company-active-map (kbd "C-p") 'company-select-previous)
+    (define-key company-active-map (kbd "TAB") 'company-complete-common-or-cycle)
+    (define-key company-active-map (kbd "<tab>") 'company-complete-common-or-cycle)
+    (define-key company-active-map (kbd "S-TAB") 'company-select-previous)
+    (define-key company-active-map (kbd "<backtab>") 'company-select-previous))
 
 (use-package company-box
   :ensure frame-local
@@ -515,4 +533,6 @@
 ;; Set my font
 (set-frame-font "CaskaydiaCove Nerd Font 15"  nil t)
 (load-file custom-file)
-(load-theme 'sanityinc-tomorrow-bright)
+(require 'color-theme-sanityinc-tomorrow)
+
+;; (load-theme 'sanityinc-tomorrow-bright)
