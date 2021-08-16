@@ -1,4 +1,4 @@
-;; This is Vikas Mishra's custom emacs init file. I haven't yet figured out how I want to load it.
+;; This is my custom emacs init file. I haven't yet figured out how I want to split it across multiple files.
 ;; The general sequence that this will follow is
 ;; 1. Enble the package manager and configure the package manager to get started as needed.
 ;; 2. Enable benchmarking tool.
@@ -295,17 +295,24 @@
 
 ;; ;; Doom Modeline for a better looking modeline
 ;; ;; More customization options can be determined from https://github.com/seagle0128/doom-modeline
+;; ;; More customization options can be determined from https://github.com/seagle0128/doom-modeline
 (use-package doom-modeline
   :ensure t
   :init (doom-modeline-mode 1)
   :config
   (setq doom-modeline-lsp t)
   (setq doom-modeline-minor-modes t)
+  (setq doom-modeline-project-detection 'projectile)
   (setq doom-modeline-continuous-word-count-modes '(markdown-mode gfm-mode org-mode))
   ;; Whether display the buffer encoding.
   (setq doom-modeline-buffer-encoding nil)
   (setq doom-modeline-env-version t)
   (setq doom-modeline-env-enable-python t))
+
+(use-package minions
+  :config
+  (minions-mode 1)
+  (global-set-key [S-down-mouse-3] 'minions-minor-modes-menu))
 
 ;; Fuzzy and Search
 (use-package fzf)
@@ -326,6 +333,13 @@
   :bind (("C-M-g" . dumb-jump-go)
          ("C-M-p" . dumb-jump-back)
          ("C-M-q" . dumb-jump-quick-look)))
+
+;; Enable tree-sitter
+(use-package tree-sitter)
+(use-package tree-sitter-langs)
+(add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
+(add-hook 'python-mode-hook #'tree-sitter-mode)
+
 
 (use-package magit
   :bind ("C-x g" . magit-status))
