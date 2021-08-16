@@ -9,11 +9,12 @@
 ;; Enble package management
 ;; ===============================
 (setq package-enable-at-startup nil)
-(setq package-archives '(("gnu" . "http://mirrors.163.com/elpa/gnu/")
+(setq package-archives '(("gnu" . "https://elpa.gnu.org/packages/")
                          ("melpa" . "https://melpa.org/packages/")
                          ("org" . "http://orgmode.org/elpa/")))
 
 ;; Bootstrap 'use-package
+(require 'package)
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package)
@@ -268,11 +269,9 @@
 
 ;; UI Improvements
 ;; Modeline, Theme and Icons
-;; Modeline configuration
-;; load color theme
-(setq custom-enabled-themes 'sanityinc-tomorrow-night)
-(use-package color-theme-sanityinc-tomorrow
-  :ensure t)
+;; Line spacing
+(setq-default line-spacing 0.15)
+
 
 (use-package all-the-icons)
 (use-package all-the-icons-dired
@@ -525,14 +524,19 @@
   (other-window 1))
 (global-set-key (kbd "C-x 3") 'split-and-follow-vertically)
 
-
+;; Line numbers
+(global-display-line-numbers-mode 1)
+(defun display-line-numbers-disable-hook ()
+  "Disable display-line-numbers locally."
+  (display-line-numbers-mode -1))
+;; Disable it for treemacs and vterm
+;; Disable line-numbers minor mode for neotree
+(add-hook 'treemacs-mode-hook 'display-line-numbers-disable-hook)
+(add-hook 'vterm-mode-hook 'display-line-numbers-disable-hook)
 
 ;; -----------------------------------------------------
 ;; Load my theme and custom.el file
 ;; -----------------------------------------------------
 ;; Set my font
 (set-frame-font "CaskaydiaCove Nerd Font 15"  nil t)
-(load-file custom-file)
-(require 'color-theme-sanityinc-tomorrow)
-
-;; (load-theme 'sanityinc-tomorrow-bright)
+(load-theme 'sanityinc-tomorrow-bright t)
