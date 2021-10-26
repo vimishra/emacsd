@@ -1,38 +1,40 @@
-;; This is my custom emacs init file. I haven't yet figured out how I want to split it across multiple files.
-;; The general sequence that this will follow is
-;; 1. Enble the package manager and configure the package manager to get started as needed.
-;; 2. Enable benchmarking tool.
-;; 3. Setup sane defaults for emacs
-;; 4. Enable oher packages
+;; =======================================================
+;; Benchmark startup time
+;; =======================================================
+(add-to-list 'after-init-hook
+             (lambda ()
+               (message (concat "emacs (" (number-to-string (emacs-pid)) ") started in " (emacs-init-time)))))
 
-;; ===============================
-;; Enble package management
-;; ===============================
+;; =======================================================
+;; Basic package setup
+;; =======================================================
 (setq package-enable-at-startup nil)
-(setq package-archives '(("gnu" . "https://elpa.gnu.org/packages/")
+(setq package-archives '(("gnu" . "http://mirrors.163.com/elpa/gnu/")
                          ("melpa" . "https://melpa.org/packages/")
                          ("org" . "http://orgmode.org/elpa/")))
 
-;; Bootstrap 'use-package
-(require 'package)
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package)
-  (eval-when-compile (require 'use-package)))
-(setq use-package-always-ensure t)
+;; =======================================================
+;; Bootstrap straight.el
+;; =======================================================
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+;; Use straight.el for use-package
+(straight-use-package 'use-package)
+(setq straight-use-package-by-default t)
 
-;; ===============================
-;; Enable benchmarking
-;; ===============================
-(use-package benchmark-init
-  :config
-  ;; To disable collection of benchmark data after init is done.
-  (add-hook 'after-init-hook 'benchmark-init/deactivate))
-
-(add-hook 'after-init-hook
-          (lambda () (message "loaded in %s" (emacs-init-time))))
-
-;; Don't litter my .emacs.d
+;; =======================================================
+;; Keep .emacs.d clean
+;; =======================================================
 (use-package no-littering               ; Keep .emacs.d clean
   :ensure t
   :config
@@ -40,9 +42,10 @@
   (add-to-list 'recentf-exclude no-littering-var-directory)
   (add-to-list 'recentf-exclude no-littering-etc-directory))
 
-;; ===============================
-;; Enable sane defaults
-;; ===============================
+
+;; =======================================================
+;; Increase Garbage collection threshold
+;; =======================================================
 (setq gc-cons-threshold (* 100 1024 1024))
 
 ;; Restore after startup
@@ -52,63 +55,29 @@
             (message "gc-cons-threshold restored to %S"
                      gc-cons-threshold)))
 
-;; Custom Elisp scripts
-(add-to-list 'load-path "~/.emacs.d/lisp/")
-
-;; ===================================
-;; Emacs configuration
-;; ===================================
+;; =======================================================
+;; Sane defaults
+;; =======================================================
 (setq-default
- ;; If the .el file is newer than the .elc file, use the .el file
- load-prefer-newer t
- ;; Don't show the startup message
- inhibit-startup-message t
- ;; Set the fill column to 135
- fill-column 135
- ;; Set a more intuitive title for emacs
- frame-title-format '("" "[%b] - Emacs " emacs-version)
- ;; Do not create lockfile
- create-lockfile nil
- ;; Don't use hard tabs
- indent-tabs-mode nil
- custom-file "~/.emacs.d/custom-file.el"
+ load-prefer-newer t                                        ;; If the .el file is newer than the .elc file, use the .el file
+ inhibit-startup-message t                                  ;; Don't show the startup message
+ fill-column 135                                            ;; Set the fill column to 135
+ frame-title-format '("" "[%b] - Emacs " emacs-version)     ;; Set a more intuitive title for emacs
+ create-lockfile nil                                        ;; Do not create lockfile
+ indent-tabs-mode nil                                       ;; Don't use hard tabs
+ custom-file "~/.emacs.d/custom-file.el"                    ;; Name of the custom file
+ auto-save-default nil                                      ;; Do I want autosave - for the time being no.
+ enable-recursive-minibuffers t                             ;; Allow commands to be run on minibuffer
+ x-select-enable-clipboard t                                ;; Makes killing/yanking interact with the clipboard.
+ x-select-enable-primary t                                  ;; Save clipboard to kill ring before killing
+ save-interprogram-paste-before-kill t                      ;; Save clipboard to kill ring before killing
+ apropos-do-all t
+ mouse-yank-at-point t)                                     ;; Mouse yank commands yank at point instead of at click.
 
- ;; Do I want autosave - for the time being no.
- auto-save-default nil
- ;; Allow commands to be run on minibuffer
- enable-recursive-minibuffers t)
- ;; Emacs can automatically create backup files. This tells Emacs to put all backups in
- ;; ~/.emacs.d/backups. More info:
+;; Emacs can automatically create backup files. This tells Emacs to put all backups in
+;; ~/.emacs.d/backups. More info:
 ;; http://www.gnu.org/software/emacs/manual/html_node/elisp/Backup-Files.html
 (setq backup-directory-alist '(("." . "~/.emacs.d/backup")))
-
-;; UI Hacks
-;; Don't show me the toolbar
-(tool-bar-mode -1)
-;; Dont use dialog boxes -prompt in minibuffer.
-(setq use-dialog-box nil)
-;; Enable global line highlight
-(global-hl-line-mode t)
-
-;; X  clipboard interaction
-(setq-default
- ;; Makes killing/yanking interact with the clipboard.
- x-select-enable-clipboard t
- ;; To understand why this is done, read `X11 Copy & Paste to/from Emacs' section here:
- ;; https://www.emacswiki.org/emacs/CopyAndPaste.
- x-select-enable-primary t
- ;; Save clipboard strings into kill ring before replacing them. When
- ;; one selects something in another program to paste it into Emacs, but
- ;; kills something in Emacs before actually pasting it, this selection
- ;; is gone unless this variable is non-nil.
- save-interprogram-paste-before-kill t
- ;; Shows all options when running apropos. For more info,
- ;; https://www.gnu.org/software/emacs/manual/html_node/emacs/Apropos.html.
- apropos-do-all t
-
- ;; Mouse yank commands yank at point instead of at click.
- mouse-yank-at-point t)
-
 ;; Other annoyances fixed
 ;; Enable narrowing commands.
 (put 'narrow-to-region 'disabled nil)
@@ -139,19 +108,22 @@
 (define-prefix-command 'vm-map)
 (global-set-key (kbd "C-1") 'vm-map)
 
-;; Other Packages
-;; Load Crux Mode
+;; =======================================================
+;; Crux mode
 ;; Details - https://github.com/bbatsov/crux
+;; =======================================================
+
 (use-package crux
   :bind (("C-a" . crux-move-beginning-of-line)
-         ("s-," . crux-find-user-init-file)
-         ("C-c o" . crux-open-with)
-         ("C-c t" . crux-visit-term-buffer)
-         ("s-k" . crux-kill-whole-line)
-         ))
+	 ("s-," . crux-find-user-init-file)
+	 ("C-c o" . crux-open-with)
+	 ("C-c t" . crux-visit-term-buffer)
+	 ("s-k" . crux-kill-whole-line)
+	 ))
 
-
-;; Programming specific improvements related to parens.
+;; =======================================================
+;; Smartparens, Rainbow delimiters, Rainbow mode
+;; =======================================================
 (use-package smartparens
   :config
   (add-hook 'prog-mode-hook 'smartparens-mode))
@@ -164,12 +136,16 @@
   (add-hook 'prog-mode-hook 'rainbow-mode))
 (add-hook 'prog-mode-hook 'electric-pair-mode)
 
+;; =======================================================
 ;; Jump to the last change
+;; =======================================================
 (use-package goto-last-change
   :bind (("C-;" . goto-last-change)))
 
+;; =======================================================
 ;; Ivy command completion framework
-;; Ivy, Counsel and Swiper
+;; Ivy, Ivy Rich, Counsel and Swiper
+;; =======================================================
 (use-package ivy
   :diminish
   :custom
@@ -181,8 +157,8 @@
   (ivy-mode 1)
 
   :bind (("C-c C-r" . #'ivy-resume)
-         ("C-c s"   . #'swiper-thing-at-point)
-         ("C-s"     . #'swiper)))
+	 ("C-c s"   . #'swiper-thing-at-point)
+	 ("C-s"     . #'swiper)))
 
 ;; Make ivy stuff in minibuffer look pretty
 (use-package ivy-rich
@@ -193,40 +169,40 @@
   :config
   (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line)
   (setq ivy-rich-path-style 'abbrev
-        ivy-rich-display-transformers-list
-        '(ivy-switch-buffer
-          (:columns
-           ((ivy-rich-candidate (:width 20))
-            (ivy-rich-switch-buffer-size (:width 7 :align right))
-            (ivy-rich-switch-buffer-indicators
-             (:width 2 :face error :align right))
-            (ivy-rich-switch-buffer-major-mode (:width 12 :face warning))
-            (ivy-rich-switch-buffer-project (:width 8 :face success))
-            (ivy-rich-switch-buffer-path
-             (:width (lambda (x)
-                       (ivy-rich-switch-buffer-shorten-path
-                        x (ivy-rich-minibuffer-width 0.3))))))
-           :predicate (lambda (cand) (get-buffer cand)))
-          counsel-M-x
-          (:columns
-           ((counsel-M-x-transformer (:width 40))
-            (ivy-rich-counsel-function-docstring
-             (:face font-lock-doc-face))))
-          counsel-describe-function
-          (:columns
-           ((counsel-describe-function-transformer (:width 40))
-            (ivy-rich-counsel-function-docstring
-             (:face font-lock-doc-face))))
-          counsel-describe-variable
-          (:columns
-           ((counsel-describe-variable-transformer (:width 40))
-            (ivy-rich-counsel-variable-docstring
-             (:face font-lock-doc-face))))
-          counsel-recentf
-          (:columns
-           ((ivy-rich-candidate (:width 0.8))
-            (ivy-rich-file-last-modified-time
-             (:face font-lock-comment-face))))))
+	ivy-rich-display-transformers-list
+	'(ivy-switch-buffer
+	  (:columns
+	   ((ivy-rich-candidate (:width 20))
+	    (ivy-rich-switch-buffer-size (:width 7 :align right))
+	    (ivy-rich-switch-buffer-indicators
+	     (:width 2 :face error :align right))
+	    (ivy-rich-switch-buffer-major-mode (:width 12 :face warning))
+	    (ivy-rich-switch-buffer-project (:width 8 :face success))
+	    (ivy-rich-switch-buffer-path
+	     (:width (lambda (x)
+		       (ivy-rich-switch-buffer-shorten-path
+			x (ivy-rich-minibuffer-width 0.3))))))
+	   :predicate (lambda (cand) (get-buffer cand)))
+	  counsel-M-x
+	  (:columns
+	   ((counsel-M-x-transformer (:width 40))
+	    (ivy-rich-counsel-function-docstring
+	     (:face font-lock-doc-face))))
+	  counsel-describe-function
+	  (:columns
+	   ((counsel-describe-function-transformer (:width 40))
+	    (ivy-rich-counsel-function-docstring
+	     (:face font-lock-doc-face))))
+	  counsel-describe-variable
+	  (:columns
+	   ((counsel-describe-variable-transformer (:width 40))
+	    (ivy-rich-counsel-variable-docstring
+	     (:face font-lock-doc-face))))
+	  counsel-recentf
+	  (:columns
+	   ((ivy-rich-candidate (:width 0.8))
+	    (ivy-rich-file-last-modified-time
+	     (:face font-lock-comment-face))))))
   (ivy-rich-mode))
 
 ;; Counsel package
@@ -235,34 +211,32 @@
   (counsel-mode 1)
 
   :bind (("C-x C-m" . #'counsel-M-x)
-         ("C-c U" . #'counsel-unicode-char)
-         ("C-c i" . #'counsel-imenu)
-         ("C-x f" . #'counsel-find-file)
-         ("C-c y" . #'counsel-yank-pop)
-         ("C-c r" . #'counsel-recentf)
-         ("C-c v" . #'counsel-switch-buffer-other-window)
-         ("C-h h" . #'counsel-command-history)
-         ("C-x C-f" . #'counsel-find-file)
-         :map ivy-minibuffer-map
-         ("C-r" . counsel-minibuffer-history))
+	 ("C-c U" . #'counsel-unicode-char)
+	 ("C-c i" . #'counsel-imenu)
+	 ("C-x f" . #'counsel-find-file)
+	 ("C-c y" . #'counsel-yank-pop)
+	 ("C-c r" . #'counsel-recentf)
+	 ("C-c v" . #'counsel-switch-buffer-other-window)
+	 ("C-h h" . #'counsel-command-history)
+	 ("C-x C-f" . #'counsel-find-file)
+	 :map ivy-minibuffer-map
+	 ("C-r" . counsel-minibuffer-history))
   :diminish)
 
 (use-package counsel-projectile
   :bind (("C-c f" . #'counsel-projectile)
-         ("C-c F" . #'counsel-projectile-switch-project)))
+	 ("C-c F" . #'counsel-projectile-switch-project)))
+;; Prescient and ivy-prescient
 (use-package prescient)
 (use-package ivy-prescient
   :config
   (ivy-prescient-mode t))
-
+;; Ivy Hydra
 (use-package ivy-hydra)
 
-(use-package projectile
-  :config
-  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
-  (projectile-mode t))
-
+;; =======================================================
 ;; Terminal improvements
+;; =======================================================
 (use-package vterm
   :ensure t)
 (setq crux-term-buffer-name "vterm")
@@ -272,7 +246,9 @@
 ;; Line spacing
 (setq-default line-spacing 0.15)
 
-
+;; =======================================================
+;; All the icons
+;; =======================================================
 (use-package all-the-icons)
 (use-package all-the-icons-dired
   :after all-the-icons
@@ -282,20 +258,25 @@
   :config (diminish 'eldoc-mode))
 
 
+;; =======================================================
+;; New version of zap
+;; =======================================================
 (use-package zop-to-char
   :init
   (global-set-key [remap zap-to-char] 'zop-to-char))
 
+;; =======================================================
 ;; Flash the line that has the cursor on a context change.
 ;; Super useful in noticing the cursor in a multi-window environment.
+;; =======================================================
 (use-package beacon
   :config
   (beacon-mode 1))
 
-
-;; ;; Doom Modeline for a better looking modeline
-;; ;; More customization options can be determined from https://github.com/seagle0128/doom-modeline
-;; ;; More customization options can be determined from https://github.com/seagle0128/doom-modeline
+;; =======================================================
+;; Doom Modeline for a better looking modeline
+;; More customization options can be determined from https://github.com/seagle0128/doom-modeline
+;; =======================================================
 (use-package doom-modeline
   :ensure t
   :init (doom-modeline-mode 1)
@@ -309,12 +290,18 @@
   (setq doom-modeline-env-version t)
   (setq doom-modeline-env-enable-python t))
 
+;; =======================================================
+;; Minor mode menu for mode-line
+;; =======================================================
 (use-package minions
   :config
   (minions-mode 1)
   (global-set-key [S-down-mouse-3] 'minions-minor-modes-menu))
 
-;; Fuzzy and Search
+
+;; =======================================================
+;; Searching - fzf, ag, ripgrep, deadgrep
+;; =======================================================
 (use-package fzf)
 (use-package ag
   :ensure t
@@ -328,34 +315,29 @@
 (use-package visual-regexp
   :bind (("C-c 5" . #'vr/replace)))
 
+;; =======================================================
+;; Programming Conveniences
+;; =======================================================
+
+;; Dumb jump
 ;; Programming conveniences
 (use-package dumb-jump
   :bind (("C-M-g" . dumb-jump-go)
          ("C-M-p" . dumb-jump-back)
          ("C-M-q" . dumb-jump-quick-look)))
 
-;; Enable tree-sitter
-(use-package tree-sitter)
-(use-package tree-sitter-langs)
-(add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
-(add-hook 'python-mode-hook #'tree-sitter-mode)
-
-
-(use-package magit
-  :bind ("C-x g" . magit-status))
-
-(use-package git-gutter
-  :config
-  (global-git-gutter-mode 't))
-
+;; =======================================================
 ;; Snippets
+;; =======================================================
 (use-package yasnippet
-    :config
-    (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
-    (yas-global-mode 1))
+  :config
+  (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
+  (yas-global-mode 1))
 (use-package yasnippet-snippets)
 
+;; =======================================================
 ;; Treemacs
+;; =======================================================
 (use-package treemacs
   :config
   (setq treemacs-width 25
@@ -370,7 +352,9 @@
   :bind ( "M-0" . treemacs-select-window)
   )
 
-
+;; =======================================================
+;; Company completion framework.
+;; =======================================================
 (use-package company
   :ensure company-box
   :init
@@ -379,25 +363,25 @@
 
   ;; (add-hook 'comint-mode-hook 'company-mode)
   :config
-    (setq company-tooltip-limit 10)
-    (setq company-dabbrev-downcase 0)
-    (setq company-idle-delay 0.1)
-    (setq company-echo-delay 0.1)
-    (setq company-minimum-prefix-length 2)
-    (setq company-require-match nil)
-    (setq company-selection-wrap-around t)
-    (setq company-tooltip-align-annotations t)
-    (setq company-show-numbers t)
-    ;; (setq company-tooltip-flip-when-above t)
-    (setq company-transformers '(company-sort-by-occurrence)) ; weight by frequency
-    (define-key company-active-map (kbd "M-n") nil)
-    (define-key company-active-map (kbd "M-p") nil)
-    (define-key company-active-map (kbd "C-n") 'company-select-next)
-    (define-key company-active-map (kbd "C-p") 'company-select-previous)
-    (define-key company-active-map (kbd "TAB") 'company-complete-common-or-cycle)
-    (define-key company-active-map (kbd "<tab>") 'company-complete-common-or-cycle)
-    (define-key company-active-map (kbd "S-TAB") 'company-select-previous)
-    (define-key company-active-map (kbd "<backtab>") 'company-select-previous))
+  (setq company-tooltip-limit 10)
+  (setq company-dabbrev-downcase 0)
+  (setq company-idle-delay 0.1)
+  (setq company-echo-delay 0.1)
+  (setq company-minimum-prefix-length 2)
+  (setq company-require-match nil)
+  (setq company-selection-wrap-around t)
+  (setq company-tooltip-align-annotations t)
+  (setq company-show-numbers t)
+  ;; (setq company-tooltip-flip-when-above t)
+  (setq company-transformers '(company-sort-by-occurrence)) ; weight by frequency
+  (define-key company-active-map (kbd "M-n") nil)
+  (define-key company-active-map (kbd "M-p") nil)
+  (define-key company-active-map (kbd "C-n") 'company-select-next)
+  (define-key company-active-map (kbd "C-p") 'company-select-previous)
+  (define-key company-active-map (kbd "TAB") 'company-complete-common-or-cycle)
+  (define-key company-active-map (kbd "<tab>") 'company-complete-common-or-cycle)
+  (define-key company-active-map (kbd "S-TAB") 'company-select-previous)
+  (define-key company-active-map (kbd "<backtab>") 'company-select-previous))
 
 (use-package company-box
   :ensure frame-local
@@ -417,7 +401,27 @@
 (use-package treemacs-projectile)
 (use-package treemacs-magit)
 
-;; LSP
+;; =======================================================
+;; Tree sitter
+;; =======================================================
+(use-package tree-sitter)
+(use-package tree-sitter-langs)
+(add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
+(add-hook 'python-mode-hook #'tree-sitter-mode)
+
+;; =======================================================
+;; Magit - the best git interface for emacs
+;; =======================================================
+(use-package magit
+  :bind ("C-x g" . magit-status))
+
+(use-package git-gutter
+  :config
+  (global-git-gutter-mode 't))
+
+;; =======================================================
+;; LSP - Language server project
+;; =======================================================
 (use-package lsp-mode
   :init
   ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
@@ -432,9 +436,12 @@
 (use-package lsp-pyright
   :ensure t
   :hook (python-mode . (lambda ()
-                          (require 'lsp-pyright)
-                          (lsp))))
+                         (require 'lsp-pyright)
+                         (lsp))))
 
+;; =======================================================
+;; lsp-ui - for a better UI for LSP
+;; =======================================================
 ;; optionally
 (use-package lsp-ui
   :config
@@ -457,7 +464,17 @@
 (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
 (lsp-treemacs-sync-mode 1)
 
-;; optionally if you want to use debugger
+;; =======================================================
+;; Python formatter - blacken
+;; =======================================================
+;; Language specific customizations
+(use-package blacken
+  :config
+  (add-hook 'python-mode-hook 'blacken-mode))
+
+;; =======================================================
+;; DAP debugger protocol
+;; =======================================================
 (use-package dap-mode
   :config
   (setq dap-auto-configure-features '(sessions locals controls tooltip))
@@ -474,36 +491,34 @@
 ;; Enable dap for python
 (require 'dap-python)
 
-;; optional if you want which-key integration
+;; =======================================================
+;; Which key
+;; =======================================================
 (use-package which-key
-    :config
-    (which-key-mode)
-    :custom
-    (which-key-idle-delay 0.3)
-    )
-
-;; Language specific customizations
-(use-package blacken
   :config
-  (add-hook 'python-mode-hook 'blacken-mode))
+  (which-key-mode)
+  :custom
+  (which-key-idle-delay 0.3)
+  )
 
+;; =======================================================
 ;; Improved Undo
+;; =======================================================
 (use-package undo-fu
   :config
   (global-unset-key (kbd "C-z"))
   (global-set-key (kbd "C-z")   'undo-fu-only-undo)
   (global-set-key (kbd "C-S-z") 'undo-fu-only-redo))
 
-
-;; Window swtiching
+;; =======================================================
+;; Switch windows efficiently
+;; =======================================================
 (use-package ace-window
   :config
   ;; Show the window designators in the modeline.
   (ace-window-display-mode)
-
-   ;; Make the number indicators a little larger. I'm getting old.
+  ;; Make the number indicators a little larger. I'm getting old.
   (set-face-attribute 'aw-leading-char-face nil :height 4.0 :background "black")
-
   (defun my-ace-window (args)
     "As ace-window, but hiding the cursor while the action is active."
     (interactive "P")
@@ -511,8 +526,6 @@
         ((cursor-type nil)
          (cursor-in-non-selected-window nil))
       (ace-window nil)))
-
-
   :bind (("C-," . my-ace-window))
   :custom
   (aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l) "Designate windows by home row keys, not numbers.")
@@ -523,7 +536,9 @@
 ;; wrap around at edges
 (setq windmove-wrap-around t)
 
-
+;; =======================================================
+;; Splitting windows - split and jump to it.
+;; =======================================================
 (defun split-and-follow-horizontally ()
   (interactive)
   (split-window-below)
@@ -538,6 +553,9 @@
   (other-window 1))
 (global-set-key (kbd "C-x 3") 'split-and-follow-vertically)
 
+;; =======================================================
+;; Show line numbers
+;; =======================================================
 ;; Line numbers
 (global-display-line-numbers-mode 1)
 (defun display-line-numbers-disable-hook ()
@@ -548,9 +566,110 @@
 (add-hook 'treemacs-mode-hook 'display-line-numbers-disable-hook)
 (add-hook 'vterm-mode-hook 'display-line-numbers-disable-hook)
 
-;; -----------------------------------------------------
-;; Load my theme and custom.el file
-;; -----------------------------------------------------
-;; Set my font
-(set-frame-font "CaskaydiaCove Nerd Font 15"  nil t)
+;; =======================================================
+;; Theme - Tomorrow Bright (I love it)
+;; =======================================================
+(use-package color-theme-sanityinc-tomorrow
+  :ensure t
+  :defer t)
 (load-theme 'sanityinc-tomorrow-bright t)
+
+;; =======================================================
+;; Org Mode, Org Roam
+;; =======================================================
+;; Turn on indentation and auto-fill mode for Org files
+(defun org-mode-setup ()
+  (org-indent-mode)
+  (variable-pitch-mode 1)
+  (auto-fill-mode 0)
+  (visual-line-mode 1)
+  (diminish org-indent-mode))
+
+(use-package org
+  :defer t
+  :hook (org-mode . dw/org-mode-setup)
+  :config
+  (setq org-ellipsis " ▾"
+        org-hide-emphasis-markers t
+        org-src-fontify-natively t
+        org-fontify-quote-and-verse-blocks t
+        org-src-tab-acts-natively t
+        org-edit-src-content-indentation 2
+        org-hide-block-startup nil
+        org-src-preserve-indentation nil
+        org-startup-folded 'content
+        org-cycle-separator-lines 2)
+
+  (setq org-modules
+    '(org-crypt
+        org-habit
+        org-bookmark
+        org-eshell
+        org-irc))
+
+  (setq org-refile-targets '((nil :maxlevel . 1)
+                             (org-agenda-files :maxlevel . 1)))
+
+  (setq org-outline-path-complete-in-steps nil)
+  (setq org-refile-use-outline-path t)
+  (org-babel-do-load-languages
+    'org-babel-load-languages
+    '((emacs-lisp . t)
+      (ledger . t))))
+
+(use-package org-superstar
+  :after org
+  :hook (org-mode . org-superstar-mode)
+  :custom
+  (org-superstar-remove-leading-stars t)
+  (org-superstar-headline-bullets-list '("◉" "○" "●" "○" "●" "○" "●")))
+
+;; Org-Roam basic configuration
+(setq org-directory (concat (getenv "HOME") "/Documents/OrgNotes/OrgRoam"))
+
+;; Make sure org-indent face is available
+(require 'org-indent)
+
+(use-package org-roam
+  :after org
+  :init (setq org-roam-v2-ack t) ;; Acknowledge V2 upgrade
+  :custom
+  (org-roam-directory (file-truename org-directory))
+  (org-roam-completion-everywhere t)
+  (org-roam-capture-templates
+   '(("d" "default" plain
+      "%?"
+      :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+      :unnarrowed t)))
+  :config
+  (org-roam-setup)
+  :bind (("C-c n f" . org-roam-node-find)
+         ("C-c n g" . org-roam-graph)
+         ("C-c n i" . org-roam-node-insert)
+         ("C-c n r" . org-roam-node-random)
+         (:map org-mode-map
+               (("C-c n i" . org-roam-node-insert)
+                ("C-M-i" . completion-at-point)
+                ("C-c n o" . org-id-get-create)
+                ("C-c n t" . org-roam-tag-add)
+                ("C-c n a" . org-roam-alias-add)
+                ("C-c n l" . org-roam-buffer-toggle)))))
+
+(use-package org-roam-ui
+  :straight
+    (:host github :repo "org-roam/org-roam-ui" :branch "main" :files ("*.el" "out"))
+    :after org-roam
+;;         normally we'd recommend hooking orui after org-roam, but since org-roam does not have
+;;         a hookable mode anymore, you're advised to pick something yourself
+;;         if you don't care about startup time, use
+;;  :hook (after-init . org-roam-ui-mode)
+    :config
+    (setq org-roam-ui-sync-theme t
+          org-roam-ui-follow t
+          org-roam-ui-update-on-save t
+          org-roam-ui-open-on-start t))
+
+;; =======================================================
+;; Set my font
+;; =======================================================
+(set-frame-font "CaskaydiaCove Nerd Font 14"  nil t)
