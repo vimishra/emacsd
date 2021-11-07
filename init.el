@@ -42,6 +42,14 @@
   (add-to-list 'recentf-exclude no-littering-var-directory)
   (add-to-list 'recentf-exclude no-littering-etc-directory))
 
+;; Exec Path from shell
+(use-package exec-path-from-shell
+  :ensure t
+  :if (memq window-system '(mac ns))
+  :config
+  (setq exec-path-from-shell-arguments '("-l"))
+  (exec-path-from-shell-initialize))
+
 
 ;; =======================================================
 ;; Increase Garbage collection threshold
@@ -245,6 +253,8 @@
 ;; Modeline, Theme and Icons
 ;; Line spacing
 (setq-default line-spacing 0.15)
+;; Disable tool-bar-mode
+(tool-bar-mode -1)
 
 ;; =======================================================
 ;; All the icons
@@ -426,18 +436,22 @@
   :init
   ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
   (setq lsp-keymap-prefix "s-l")
+  :config
+  (lsp-register-custom-settings
+   '(("pyls.plugins.pyls_mypy.enabled" t t)
+     ("pyls.plugins.pyls_mypy.live_mode" nil t)
+     ("pyls.plugins.pyls_black.enabled" t t)
+     ("pyls.plugins.pyls_isort.enabled" t t)))
   :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
-         (python-mode . lsp)
          ;; if you want which-key integration
          (lsp-mode . lsp-enable-which-key-integration))
   :commands lsp)
 
-;; Use pyright for python
 (use-package lsp-pyright
-  :ensure t
-  :hook (python-mode . (lambda ()
-                         (require 'lsp-pyright)
-                         (lsp))))
+  :hook
+  (python-mode . (lambda ()
+                   (require 'lsp-pyright)
+                   (lsp))))
 
 ;; =======================================================
 ;; lsp-ui - for a better UI for LSP
@@ -580,14 +594,14 @@
 ;; Turn on indentation and auto-fill mode for Org files
 (defun org-mode-setup ()
   (org-indent-mode)
-  (variable-pitch-mode 1)
+  (variable-pitch-mode 0)
   (auto-fill-mode 0)
   (visual-line-mode 1)
   (diminish org-indent-mode))
 
 (use-package org
   :defer t
-  :hook (org-mode . dw/org-mode-setup)
+  :hook (org-mode . org-mode-setup)
   :config
   (setq org-ellipsis " ▾"
         org-hide-emphasis-markers t
@@ -670,6 +684,34 @@
           org-roam-ui-open-on-start t))
 
 ;; =======================================================
+;; Helpful
+;; =======================================================
+(use-package helpful
+  :bind
+  (("C-h f" . helpful-callable)
+   ("C-h v" . helpful-variable)
+   ("C-h k" . helpful-key)
+   ("C-c C-d" . helpful-at-point)
+   ("C-h F" . helpful-function)
+   ("C-h C" . helpful-comman)
+   )
+  :config
+  (setq counsel-describe-function-function #'helpful-callable)
+  (setq counsel-describe-variable-function #'helpful-variable)
+  )
+
+;; =======================================================
+;; ielm
+;; =======================================================
+(use-package ielm
+  :commands ielm
+  :init
+  (defun ielm-start-process (&rest args)
+    "Start a process in a new buffer"
+    (let ((progname (car args)))
+      (apply 'start-process progname (concat "*" progname "*") args))))
+
+;; =======================================================
 ;; Set my font
 ;; =======================================================
-(set-frame-font "CaskaydiaCove Nerd Font 14"  nil t)
+(set-frame-font "CaskaydiaCove Nerd Font 16"  nil t)
