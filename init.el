@@ -168,6 +168,28 @@
 	 ("C-c s"   . #'swiper-thing-at-point)
 	 ("C-s"     . #'swiper)))
 
+;; Counsel package
+(use-package counsel
+  :init
+  (counsel-mode 1)
+
+  :bind (("C-x C-m" . #'counsel-M-x)
+	 ("C-c U" . #'counsel-unicode-char)
+	 ("C-c i" . #'counsel-imenu)
+	 ("C-x f" . #'counsel-find-file)
+	 ("C-c y" . #'counsel-yank-pop)
+	 ("C-c r" . #'counsel-recentf)
+	 ("C-c v" . #'counsel-switch-buffer-other-window)
+	 ("C-h h" . #'counsel-command-history)
+	 ("C-x C-f" . #'counsel-find-file)
+	 :map ivy-minibuffer-map
+	 ("C-r" . counsel-minibuffer-history))
+  :diminish)
+
+(use-package counsel-projectile
+  :bind (("C-c f" . #'counsel-projectile)
+	 ("C-c F" . #'counsel-projectile-switch-project)))
+
 ;; Make ivy stuff in minibuffer look pretty
 (use-package ivy-rich
   :custom
@@ -213,27 +235,7 @@
 	     (:face font-lock-comment-face))))))
   (ivy-rich-mode))
 
-;; Counsel package
-(use-package counsel
-  :init
-  (counsel-mode 1)
 
-  :bind (("C-x C-m" . #'counsel-M-x)
-	 ("C-c U" . #'counsel-unicode-char)
-	 ("C-c i" . #'counsel-imenu)
-	 ("C-x f" . #'counsel-find-file)
-	 ("C-c y" . #'counsel-yank-pop)
-	 ("C-c r" . #'counsel-recentf)
-	 ("C-c v" . #'counsel-switch-buffer-other-window)
-	 ("C-h h" . #'counsel-command-history)
-	 ("C-x C-f" . #'counsel-find-file)
-	 :map ivy-minibuffer-map
-	 ("C-r" . counsel-minibuffer-history))
-  :diminish)
-
-(use-package counsel-projectile
-  :bind (("C-c f" . #'counsel-projectile)
-	 ("C-c F" . #'counsel-projectile-switch-project)))
 ;; Prescient and ivy-prescient
 (use-package prescient)
 (use-package ivy-prescient
