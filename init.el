@@ -32,6 +32,13 @@
 (straight-use-package 'use-package)
 (setq straight-use-package-by-default t)
 
+;; Use benchmark to figure out your load time.
+(use-package benchmark-init
+  :ensure t
+  :config
+  ;; To disable collection of benchmark data after init is done.
+  (add-hook 'after-init-hook 'benchmark-init/deactivate))
+
 ;; =======================================================
 ;; Keep .emacs.d clean
 ;; =======================================================
