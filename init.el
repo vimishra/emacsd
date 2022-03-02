@@ -57,7 +57,6 @@
   (setq exec-path-from-shell-arguments '("-l"))
   (exec-path-from-shell-initialize))
 
-
 ;; =======================================================
 ;; Increase Garbage collection threshold
 ;; =======================================================
@@ -127,7 +126,6 @@
 ;; Crux mode
 ;; Details - https://github.com/bbatsov/crux
 ;; =======================================================
-
 (use-package crux
   :bind (("C-a" . crux-move-beginning-of-line)
 	 ("s-," . crux-find-user-init-file)
@@ -152,10 +150,17 @@
 (add-hook 'prog-mode-hook 'electric-pair-mode)
 
 ;; =======================================================
-;; Jump to the last change
+;; Emacs conveniences
 ;; =======================================================
+
+;; Jump to the last change
 (use-package goto-last-change
+  :defer t
   :bind (("C-;" . goto-last-change)))
+
+;; Restart Emaacs easily
+(use-package restart-emacs
+  :defer t)
 
 ;; =======================================================
 ;; Ivy command completion framework
@@ -257,6 +262,21 @@
 (use-package vterm
   :ensure t)
 (setq crux-term-buffer-name "vterm")
+(use-package vterm-toggle
+  :ensure t
+  :config
+  (global-set-key (kbd "C-1 t") 'vterm-toggle)
+  (global-set-key (kbd "C-1 s") 'vterm-toggle-cd)
+
+  ;; you can cd to the directory where your previous buffer file exists
+  ;; after you have toggle to the vterm buffer with `vterm-toggle'.
+  (define-key vterm-mode-map [(control return)]   #'vterm-toggle-insert-cd)
+
+  ;; Switch to next vterm buffer
+  (define-key vterm-mode-map (kbd "s-n")   'vterm-toggle-forward)
+  ;; Switch to previous vterm buffer
+  (define-key vterm-mode-map (kbd "s-p")   'vterm-toggle-backward)
+  )
 
 ;; UI Improvements
 ;; Modeline, Theme and Icons
@@ -719,6 +739,8 @@
     "Start a process in a new buffer"
     (let ((progname (car args)))
       (apply 'start-process progname (concat "*" progname "*") args))))
+
+
 
 ;; =======================================================
 ;; Set my font
