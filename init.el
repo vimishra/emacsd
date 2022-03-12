@@ -162,6 +162,21 @@
 (use-package restart-emacs
   :defer t)
 
+(use-package insert-shebang)
+(setq insert-shebang-file-types
+   '(("py" . "python3")
+     ("groovy" . "groovy")
+     ("fish" . "fish")
+     ("robot" . "robot")
+     ("rb" . "ruby")
+     ("lua" . "lua")
+     ("php" . "php")
+     ("sh" . "bash")
+     ("pl" . "perl")
+     ("raku" . "raku")))
+(add-hook 'after-save-hook
+          'executable-make-buffer-file-executable-if-script-p)
+
 ;; =======================================================
 ;; Ivy command completion framework
 ;; Ivy, Ivy Rich, Counsel and Swiper
@@ -404,7 +419,7 @@
   :config
   (setq company-tooltip-limit 10)
   (setq company-dabbrev-downcase 0)
-  (setq company-idle-delay 0.1)
+  (setq company-idle-delay 0)
   (setq company-echo-delay 0.1)
   (setq company-minimum-prefix-length 2)
   (setq company-require-match nil)
@@ -425,6 +440,11 @@
 (use-package company-box
   :ensure frame-local
   :hook (company-mode . company-box-mode))
+
+;; Enable tabnine based AI completion
+;; Tabnine company
+(use-package company-tabnine :ensure t)
+(add-to-list 'company-backends #'company-tabnine)
 
 (setq treemacs-autopeek-mode nil)
 
@@ -514,6 +534,8 @@
 (use-package blacken
   :config
   (add-hook 'python-mode-hook 'blacken-mode))
+(setq python-shell-interpreter "/Users/vikasmis/anaconda/bin/python3")
+
 
 ;; =======================================================
 ;; DAP debugger protocol
