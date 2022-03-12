@@ -762,9 +762,11 @@
     (let ((progname (car args)))
       (apply 'start-process progname (concat "*" progname "*") args))))
 
+(use-package fish-mode)
+
 
 
 ;; =======================================================
 ;; Set my font
 ;; =======================================================
-(set-frame-font "CaskaydiaCove Nerd Font 16"  nil t)
+(set-frame-font "CaskaydiaCove Nerd Font 12"  nil t)
