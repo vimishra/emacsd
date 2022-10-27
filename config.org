@@ -829,6 +829,138 @@
     #+end_src
 
 
+
+** Org Mode
+
+This is perhaps the most important section in the entire config file. This is because this deals with the org mode stuff that I use.
+#+begin_src elisp
+
+  ;; Use fancy bullets for the org mode
+  (use-package org-bullets :ensure t)
+  ;; Enable fancy bullets for the org mode.
+  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+  ;; Hide the leading stars in the org mode.
+  (setq org-hide-leading-stars t)
+
+  ;; Fancy folding for Org mode.
+  (setq org-ellipsis "⤵")
+
+  ;; Org syntax highlighting
+  (setq org-src-fontify-natively t)
+
+  ;; Pretty symbols
+  (global-prettify-symbols-mode t)
+
+  ;; Use current window for the org mode edit source windows
+  (setq org-src-window-setup 'current-window)
+
+  ;; Directory where all my org files are stored
+  (setq org-directory "~/Documents/OrgNotes/")
+
+  ;; Other global configurations for org mode.
+  (setq org-image-actual-width 1500)
+  ;; I want to open org link in other windows - not the same window.
+  (setf (alist-get 'file org-link-frame-setup) #'find-file-other-window)
+
+  ;; I want to log when I mark a task as done
+  (setq org-log-done 'time)
+
+  ;; Set my sequence of todo things
+  (setq org-todo-keywords
+        '((sequence
+           "NEXT(N)"  ; Task that's ready to be next. No dependencies
+           "TODO(t)"  ; A task that needs doing & is ready to do
+           "INPROGRESS(i)"  ; A project, which usually contains other tasks
+           "WAIT(w)"  ; Something external is holding up this task
+           "HOLD(h)"  ; This task is paused/on hold because of me
+           "|"
+           "DONE(d)"  ; Task successfully completed
+           "KILL(k)") ; Task was cancelled, aborted or is no longer applicable
+          (sequence
+           "[ ](T)"   ; A task that needs doing
+           "[-](S)"   ; Task is in progress
+           "[?](W)"   ; Task is being held up or paused
+           "|"
+           "[X](D)")  ; Task was completed
+          (sequence
+           "|"
+           "OKAY(o)"
+           "YES(y)"
+           "NO(n)")))
+
+  ;; Org Tags
+  (setq org-tag-alist '(
+                        ;; Meeting tags
+                        ("Team" . ?t)
+                        ("Laguna" . ?l)
+                        ("Redondo" . ?r)
+                        ("Newport" . ?n)
+                        ("Meeting". ?m)
+                        ("Planning" . ?p)
+
+                        ;; Work Log Tags
+                        ("accomplishment" . ?a)
+                        ))
+
+  ;; Tag colors
+  (setq org-tag-faces
+        '(
+          ("Team"  . (:foreground "mediumPurple1" :weight bold))
+          ("Laguna"   . (:foreground "royalblue1"    :weight bold))
+          ("Redondo"  . (:foreground "forest green"  :weight bold))
+          ("Newport"        . (:foreground "sienna"        :weight bold))
+          ("Meeting"   . (:foreground "yellow1"       :weight bold))
+          ("Planning" . (:foreground "Orange" :weight bold))
+          ("CRITICAL"  . (:foreground "red1"          :weight bold))
+          )
+        )
+  ;; My org-capture templates
+  (setq org-capture-templates
+        '(("t" "Personal todo" entry
+           (file+headline +org-capture-todo-file "Inbox")
+           "* TODO %?\n%i\n%a" :prepend t)
+          ("l" "Laguna Todos" entry
+           (file+headline "~/Documents/OrgNotes/Laguna_TODO.org" "Laguna TODOs")
+           "* TODO %?\n%i\n%a" :prepend t)
+          ("r" "Redondo Todos" entry
+           (file+headline "~/Documents/OrgNotes/Redondo_TODO.org" "Redondo TODOs")
+           "* TODO %?\n%i\n%a" :prepend t)
+          ("n" "Newport Todos" entry
+           (file+headline "~/Documents/OrgNotes/Newport_TODO.org" "Newport TODOs")
+           "* TODO %?\n%i\n%a" :prepend t)
+          ("i" "IP Team Todos" entry
+           (file+headline "~/Documents/OrgNotes/Team_TODO.org" "Team TODOs")
+           "* TODO %?\n%i\n%a" :prepend t)
+          ("m" "Meeting"
+           entry (file+datetree "~/Documents/OrgNotes/Meetings.org")
+           "* %? :meeting:%^g \n:Created: %T\n** Attendees\n+ \n** Notes\n+ \n** Action Items\n*** TODO [#A] "
+           :tree-type week
+           :clock-in t
+           :clock-resume t
+           :empty-lines 0)
+          ("j" "Journal" entry
+           (file+olp+datetree +org-capture-journal-file)
+           "* %U %?\n%i\n%a" :prepend t)))
+
+
+  ;; Load my custom agenda configuration for Org mode.
+  (add-to-list 'load-path "~/.emacs.d/lisp/")
+  (require 'vm-agenda)
+
+  ;; Configure org-roam
+  (use-package org-roam
+    :custom
+    (org-roam-directory "~/Documents/OrgNotes/roam/")
+    :bind (("C-c n l" . org-roam-buffer-toggle)
+           ("C-c n f" . org-roam-node-find))
+                                          ; global-page-break-lines-mode will break the org-roam buffer
+    :hook ( org-roam-mode . (lambda () (global-page-break-lines-mode -1)))
+    :config
+    (org-roam-setup))
+
+#+end_src
+
+
 ** Colors, UI and the fonts
 *** Helpful
     Helpul mode for expanded help functions.
