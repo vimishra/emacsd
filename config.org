@@ -834,7 +834,6 @@
 
 This is perhaps the most important section in the entire config file. This is because this deals with the org mode stuff that I use.
 #+begin_src elisp
-
   ;; Use fancy bullets for the org mode
   (use-package org-bullets :ensure t)
   ;; Enable fancy bullets for the org mode.
@@ -944,8 +943,19 @@ This is perhaps the most important section in the entire config file. This is be
 
 
   ;; Load my custom agenda configuration for Org mode.
-  (add-to-list 'load-path "~/.emacs.d/lisp/")
+  (add-to-list 'load-path "~/.emacs.custom/lisp/")
   (require 'vm-agenda)
+
+  ;; Configure org-download
+  (use-package org-download
+    :custom
+    (org-download-method 'attach)
+    (org-download-timestamp "_%Y%m%d_%H%M%S")
+    (org-download-screenshot-method "screencapture -i %s")
+    (org-download-link-format "[[download:%s]]\n")
+    :bind
+    (("C-c p" . org-download-screenshot))
+    )
 
   ;; Configure org-roam
   (use-package org-roam
@@ -990,5 +1000,5 @@ This is perhaps the most important section in the entire config file. This is be
 
 *** Final UI - font
     #+begin_src elisp
-      (set-frame-font "CaskaydiaCove Nerd Font 16"  nil t)
+      (set-frame-font "CaskaydiaCove Nerd Font 18"  nil t)
     #+end_src
