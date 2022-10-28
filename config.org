@@ -6,44 +6,44 @@
 
 ** The Past
 
-   Hello, this is my customized Emacs configuration. I started my Emacs journey
-   20 years ago with a hacked and copy pasted emacs configuration from all sorts
-   of places on the web and especially on comp.gnu.emacs. I used that for close
-   to 10 years and then I found Emacs Prelude. I fell in love with Prelude and
-   used it for many many years (~10 years). I never fullqy understood what was
-   inside prelude, but I used it.
+Hello, this is my customized Emacs configuration. I started my Emacs journey
+20 years ago with a hacked and copy pasted emacs configuration from all sorts
+of places on the web and especially on comp.gnu.emacs. I used that for close
+to 10 years and then I found Emacs Prelude. I fell in love with Prelude and
+used it for many many years (~10 years). I never fullqy understood what was
+inside prelude, but I used it.
 
-   There were some inconveniences such as having “C-a” work in a terminal inside
-   emacs, but by and large, I got ok with it. Things changed when I tried to
-   enable LSP and DAP and while this was supported (during later versions), I
-   was never fully happy with it. Regardless this was still one of the
-   productive times for Emacs - where I didn’t have to keep on tinkering with
-   it.
+There were some inconveniences such as having “C-a” work in a terminal inside
+emacs, but by and large, I got ok with it. Things changed when I tried to
+enable LSP and DAP and while this was supported (during later versions), I
+was never fully happy with it. Regardless this was still one of the
+productive times for Emacs - where I didn’t have to keep on tinkering with
+it.
 
-   Then I saw spacemacs and I thought it was very well configured - I started
-   using that and really liked the well tested out integration of various
-   modes. I hated the evil mode centered build though. And the fact that every
-   key binding was 10 chars long. In addition, it kept getting slower and slower
-   for me. I figured out this was time for me to get started with my own
-   configuration.
+Then I saw spacemacs and I thought it was very well configured - I started
+using that and really liked the well tested out integration of various
+modes. I hated the evil mode centered build though. And the fact that every
+key binding was 10 chars long. In addition, it kept getting slower and slower
+for me. I figured out this was time for me to get started with my own
+configuration.
 
 ** The Present
 
-   I then found out about `use-package` and I know I must have been living under
-   a rock for not having heard about it. Nevertheless I found out about it and
-   suddenly emacs configuration didn’t need to be spread out over multiple
-   files. I could keep it nice and organized and keep all the related
-   configuration to one mode together in one file. I could also split it across
-   multiple files, but one file was good enough.
+I then found out about `use-package` and I know I must have been living under
+a rock for not having heard about it. Nevertheless I found out about it and
+suddenly emacs configuration didn’t need to be spread out over multiple
+files. I could keep it nice and organized and keep all the related
+configuration to one mode together in one file. I could also split it across
+multiple files, but one file was good enough.
 
-   Suddenly emacs became extremely snappy even without native compilation and it
-   became a pleasure to use again. As a comparison, my startup time was reduced
-   10x (from ~30+ seconds to ~3.15 seconds). Yes some of it is not as nice as
-   spacemacs, but it is good enough for me and hey that’s what matters.
+Suddenly emacs became extremely snappy even without native compilation and it
+became a pleasure to use again. As a comparison, my startup time was reduced
+10x (from ~30+ seconds to ~3.15 seconds). Yes some of it is not as nice as
+spacemacs, but it is good enough for me and hey that’s what matters.
 
-   The rest of the file broadly outlines my configuration - this is more for my
-   memory, so I remember my design decisions. If it helps anyone else that is in
-   a similar position as me, that’s a bonus.
+The rest of the file broadly outlines my configuration - this is more for my
+memory, so I remember my design decisions. If it helps anyone else that is in
+a similar position as me, that’s a bonus.
 
 
 * Emacs Configuration
@@ -51,46 +51,44 @@
 ** Basic configuration and setup
 *** Package Management and straight.el
 
-    Let's setup package.el to work with ELPA, MELPA and Org repo.
+Let's setup package.el to work with ELPA, MELPA and Org repo.
 
     #+begin_src elisp
 
-      (setq package-enable-at-startup nil)
-      (setq package-archives
-	      '(("gnu" . "http://mirrors.163.com/elpa/gnu/")
-	        ("melpa" . "https://melpa.org/packages/")
-	        ("org" . "http://orgmode.org/elpa/")))
-
+  (setq package-enable-at-startup nil)
+  (setq package-archives
+        '(("gnu" . "http://mirrors.163.com/elpa/gnu/")
+          ("melpa" . "https://melpa.org/packages/")))
     #+end_src
 
-    Now let's bootstrap straight.el
+Now let's bootstrap straight.el
 
     #+begin_src  elisp
-      ;; =======================================================
-      ;; Bootstrap straight.el
-      ;; =======================================================
-      (defvar bootstrap-version)
-      (let ((bootstrap-file
-	     (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-	    (bootstrap-version 5))
-        (unless (file-exists-p bootstrap-file)
-	  (with-current-buffer
-	      (url-retrieve-synchronously
-	       "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-	       'silent 'inhibit-cookies)
-	    (goto-char (point-max))
-	    (eval-print-last-sexp)))
-        (load bootstrap-file nil 'nomessage))
-      ;; Use straight.el for use-package
-      (straight-use-package 'use-package)
-      (setq straight-use-package-by-default t)
+  ;; =======================================================
+  ;; Bootstrap straight.el
+  ;; =======================================================
+  (defvar bootstrap-version)
+  (let ((bootstrap-file
+         (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+        (bootstrap-version 5))
+    (unless (file-exists-p bootstrap-file)
+      (with-current-buffer
+          (url-retrieve-synchronously
+           "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+           'silent 'inhibit-cookies)
+        (goto-char (point-max))
+        (eval-print-last-sexp)))
+    (load bootstrap-file nil 'nomessage))
+  ;; Use straight.el for use-package
+  (straight-use-package 'use-package)
+  (setq straight-use-package-by-default t)
     #+end_src
 
 *** Benchmark your start time.
 
-    In order to find out what is taking a long time in the configuration of the
-    package, we are going to use the benchmark-init package.  With this we can
-    figure out how long each step in this process takes.
+In order to find out what is taking a long time in the configuration of the
+package, we are going to use the benchmark-init package.  With this we can
+figure out how long each step in this process takes.
 
     #+begin_src elisp
   (use-package benchmark-init
@@ -113,8 +111,8 @@
 
 *** Basic Housekeeping stuff.
 
-    I want to increase my GC threshold here so the emacs doesn't keep on doing
-    Garbage collection again and again.
+I want to increase my GC threshold here so the emacs doesn't keep on doing
+Garbage collection again and again.
 
     #+begin_src elisp
   ;; Using garbage magic hack.
@@ -137,698 +135,698 @@
   (setq comp-async-report-warnings-errors nil)
     #+end_src
 
-    We need to also setup some basic defaults for Emacs to make it more
-    productive. Here are these - most of them are pretty self explanatory.
+We need to also setup some basic defaults for Emacs to make it more
+productive. Here are these - most of them are pretty self explanatory.
 
     #+begin_src elisp
-      ;; =======================================================
-      ;; Sane defaults
-      ;; =======================================================
-      (setq-default
-       load-prefer-newer t                                        ;; If the .el file is newer than the .elc file, use the .el file
-       inhibit-startup-message t                                  ;; Don't show the startup message
-       fill-column 80                                             ;; Set the fill column to 135
-       frame-title-format '("" "[%b] - Emacs " emacs-version)     ;; Set a more intuitive title for emacs
-       create-lockfile nil                                        ;; Do not create lockfile
-       indent-tabs-mode nil                                       ;; Don't use hard tabs
-       custom-file "~/.emacs.d/custom-file.el"                    ;; Name of the custom file
-       auto-save-default nil                                      ;; Do I want autosave - for the time being no.
-       enable-recursive-minibuffers t                             ;; Allow commands to be run on minibuffer
-       x-select-enable-clipboard t                                ;; Makes killing/yanking interact with the clipboard.
-       x-select-enable-primary t                                  ;; Save clipboard to kill ring before killing
-       save-interprogram-paste-before-kill t                      ;; Save clipboard to kill ring before killing
-       apropos-do-all t
-       mouse-yank-at-point t)                                     ;; Mouse yank commands yank at point instead of at click.
+  ;; =======================================================
+  ;; Sane defaults
+  ;; =======================================================
+  (setq-default
+   load-prefer-newer t                                        ;; If the .el file is newer than the .elc file, use the .el file
+   inhibit-startup-message t                                  ;; Don't show the startup message
+   fill-column 80                                             ;; Set the fill column to 135
+   frame-title-format '("" "[%b] - Emacs " emacs-version)     ;; Set a more intuitive title for emacs
+   create-lockfile nil                                        ;; Do not create lockfile
+   indent-tabs-mode nil                                       ;; Don't use hard tabs
+   custom-file "~/.emacs.d/custom-file.el"                    ;; Name of the custom file
+   auto-save-default nil                                      ;; Do I want autosave - for the time being no.
+   enable-recursive-minibuffers t                             ;; Allow commands to be run on minibuffer
+   x-select-enable-clipboard t                                ;; Makes killing/yanking interact with the clipboard.
+   x-select-enable-primary t                                  ;; Save clipboard to kill ring before killing
+   save-interprogram-paste-before-kill t                      ;; Save clipboard to kill ring before killing
+   apropos-do-all t
+   mouse-yank-at-point t)                                     ;; Mouse yank commands yank at point instead of at click.
 
-      ;; Emacs can automatically create backup files. This tells Emacs to put all backups in
-      ;; ~/.emacs.d/backups. More info:
-      ;; http://www.gnu.org/software/emacs/manual/html_node/elisp/Backup-Files.html
-      (setq backup-directory-alist '(("." . "~/.emacs.d/backup")))
-      ;; Other annoyances fixed
-      ;; Enable narrowing commands.
-      (put 'narrow-to-region 'disabled nil)
-      (put 'narrow-to-page 'disabled nil)
-      ;; Display column number in mode line.
-      (column-number-mode t)
-      ;; Automatically update buffers if file content on the disk has changed.
-      (global-auto-revert-mode t)
-      ;; Change all yes/no questions to y/n type
-      (fset 'yes-or-no-p 'y-or-n-p)
-      ;; Make the command key behave as 'meta'
-      (when (eq system-type 'darwin)
-        ;; Use my option key as meta and command key as hyper
-        (setq mac-option-modifier 'meta)
-        (setq mac-command-modifier 'super))
+  ;; Emacs can automatically create backup files. This tells Emacs to put all backups in
+  ;; ~/.emacs.d/backups. More info:
+  ;; http://www.gnu.org/software/emacs/manual/html_node/elisp/Backup-Files.html
+  (setq backup-directory-alist '(("." . "~/.emacs.d/backup")))
+  ;; Other annoyances fixed
+  ;; Enable narrowing commands.
+  (put 'narrow-to-region 'disabled nil)
+  (put 'narrow-to-page 'disabled nil)
+  ;; Display column number in mode line.
+  (column-number-mode t)
+  ;; Automatically update buffers if file content on the disk has changed.
+  (global-auto-revert-mode t)
+  ;; Change all yes/no questions to y/n type
+  (fset 'yes-or-no-p 'y-or-n-p)
+  ;; Make the command key behave as 'meta'
+  (when (eq system-type 'darwin)
+    ;; Use my option key as meta and command key as hyper
+    (setq mac-option-modifier 'meta)
+    (setq mac-command-modifier 'super))
 
-      ;; Delete whitespace just when a file is saved.
-      (add-hook 'before-save-hook 'delete-trailing-whitespace)
-      ;; Disable commands that are not useful
-      (unbind-key "C-x C-d") ;; list-directory
-      (unbind-key "C-z") ;; suspend-frame
-      (unbind-key "M-o") ;; facemenu-mode
-      (setq require-final-newline t)
-      (setq enable-local-variables :all)
+  ;; Delete whitespace just when a file is saved.
+  (add-hook 'before-save-hook 'delete-trailing-whitespace)
+  ;; Disable commands that are not useful
+  (unbind-key "C-x C-d") ;; list-directory
+  (unbind-key "C-z") ;; suspend-frame
+  (unbind-key "M-o") ;; facemenu-mode
+  (setq require-final-newline t)
+  (setq enable-local-variables :all)
 
-      ;; Line spacing
-      (setq-default line-spacing 0.15)
-      ;; Disable tool-bar-mode
-      (tool-bar-mode -1)
-      ;; I don't want any blinking or beeping
-      (setq ring-bell-function #'ignore)
-      (setq visible-bell nil)
+  ;; Line spacing
+  (setq-default line-spacing 0.15)
+  ;; Disable tool-bar-mode
+  (tool-bar-mode -1)
+  ;; I don't want any blinking or beeping
+  (setq ring-bell-function #'ignore)
+  (setq visible-bell nil)
     #+end_src
 
 
 ** Productivity improvements
 *** Personal Key maps
     #+begin_src elisp
-      ;; Define vm-map
-      (define-prefix-command 'vm-map)
-      (global-set-key (kbd "C-c") 'vm-map)
+  ;; Define vm-map
+  (define-prefix-command 'vm-map)
+  (global-set-key (kbd "C-c") 'vm-map)
     #+end_src
 
 *** Crux Mode
 
-    Crux mode provides a lot of good configuration options that are very
-    useful. More details can be found at [[https://github.com/bbatsov/crux][Crux Home Page]].
+Crux mode provides a lot of good configuration options that are very
+useful. More details can be found at [[https://github.com/bbatsov/crux][Crux Home Page]].
 
     #+begin_src elisp
-      (use-package crux
-        :bind (("C-a" . crux-move-beginning-of-line)
-               ("s-," . crux-find-user-init-file)
-               ("C-c o" . crux-open-with)
-               ("C-c t" . crux-visit-term-buffer)
-               ("s-k" . crux-kill-whole-line)
-               ))
+  (use-package crux
+    :bind (("C-a" . crux-move-beginning-of-line)
+           ("s-," . crux-find-user-init-file)
+           ("C-c o" . crux-open-with)
+           ("C-c t" . crux-visit-term-buffer)
+           ("s-k" . crux-kill-whole-line)
+           ))
     #+end_src
 
 *** Lisp programming conveniences.
 
-    Here we create a lot of lisp conveniences such as smartparens matching,
-    rainbow delimiters and adding colored braces. In addition, we turn on the
-    electric pair mode so braces are automatically matched.
+Here we create a lot of lisp conveniences such as smartparens matching,
+rainbow delimiters and adding colored braces. In addition, we turn on the
+electric pair mode so braces are automatically matched.
 
     #+begin_src elisp
-      (use-package smartparens
-        :config
-        (add-hook 'prog-mode-hook 'smartparens-mode))
-      (use-package rainbow-delimiters
-        :config
-        (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
-      (use-package rainbow-mode
-        :config
-        (setq rainbow-x-colors nil)
-        (add-hook 'prog-mode-hook 'rainbow-mode))
-      (add-hook 'prog-mode-hook 'electric-pair-mode)
+  (use-package smartparens
+    :config
+    (add-hook 'prog-mode-hook 'smartparens-mode))
+  (use-package rainbow-delimiters
+    :config
+    (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
+  (use-package rainbow-mode
+    :config
+    (setq rainbow-x-colors nil)
+    (add-hook 'prog-mode-hook 'rainbow-mode))
+  (add-hook 'prog-mode-hook 'electric-pair-mode)
     #+end_src
 
 *** Emacs conveniences
 
-    This is a good way to jump to the last change made in the editor. Also I need
-    to restart emacs every now and then and =restart-emacs= is a good package to
-    manage that.
+This is a good way to jump to the last change made in the editor. Also I need
+to restart emacs every now and then and =restart-emacs= is a good package to
+manage that.
 
     #+begin_src elisp
-      ;; Jump to the last change
-      (use-package goto-last-change
-        :defer t
-        :bind (("C-;" . goto-last-change)))
+  ;; Jump to the last change
+  (use-package goto-last-change
+    :defer t
+    :bind (("C-;" . goto-last-change)))
 
-      ;; Restart Emaacs easily
-      (use-package restart-emacs
-        :defer t)
+  ;; Restart Emaacs easily
+  (use-package restart-emacs
+    :defer t)
     #+end_src
 
 *** Ivy and related packages
 
-    Ivy is a fantastic completion framework. On it's own it is a bit plain, but
-    ivy-rich, counsel and prescient make it a pretty complete package. More
-    details can be found about ivy at [[https://github.com/abo-abo/swiper][Ivy Github Page]].
+Ivy is a fantastic completion framework. On it's own it is a bit plain, but
+ivy-rich, counsel and prescient make it a pretty complete package. More
+details can be found about ivy at [[https://github.com/abo-abo/swiper][Ivy Github Page]].
 
     #+begin_src elisp
-      ;; =======================================================
-      ;; Ivy command completion framework
-      ;; Ivy, Ivy Rich, Counsel and Swiper
-      ;; =======================================================
-      (use-package ivy
-        :diminish
-        :custom
-        (ivy-height 15)
-        (ivy-count-format "(%d/%d) ")
-        (ivy-use-virtual-buffers t)
-        (ivy-use-selectable-prompt t)
-        :config
-        (ivy-mode 1)
+  ;; =======================================================
+  ;; Ivy command completion framework
+  ;; Ivy, Ivy Rich, Counsel and Swiper
+  ;; =======================================================
+  (use-package ivy
+    :diminish
+    :custom
+    (ivy-height 15)
+    (ivy-count-format "(%d/%d) ")
+    (ivy-use-virtual-buffers t)
+    (ivy-use-selectable-prompt t)
+    :config
+    (ivy-mode 1)
 
-        :bind (("C-c C-r" . #'ivy-resume)
-               ("C-c s"   . #'swiper-thing-at-point)
-               ("C-s"     . #'swiper)))
+    :bind (("C-c C-r" . #'ivy-resume)
+           ("C-c s"   . #'swiper-thing-at-point)
+           ("C-s"     . #'swiper)))
 
-      ;; Counsel package
-      (use-package counsel
-        :init
-        (counsel-mode 1)
+  ;; Counsel package
+  (use-package counsel
+    :init
+    (counsel-mode 1)
 
-        :bind (("C-x C-m" . #'counsel-M-x)
-               ("C-c U" . #'counsel-unicode-char)
-               ("C-c i" . #'counsel-imenu)
-               ("C-x f" . #'counsel-find-file)
-               ("C-c y" . #'counsel-yank-pop)
-               ("C-c r" . #'counsel-recentf)
-               ("C-c v" . #'counsel-switch-buffer-other-window)
-               ("C-h h" . #'counsel-command-history)
-               ("C-x C-f" . #'counsel-find-file)
-               :map ivy-minibuffer-map
-               ("C-r" . counsel-minibuffer-history))
-        :diminish)
+    :bind (("C-x C-m" . #'counsel-M-x)
+           ("C-c U" . #'counsel-unicode-char)
+           ("C-c i" . #'counsel-imenu)
+           ("C-x f" . #'counsel-find-file)
+           ("C-c y" . #'counsel-yank-pop)
+           ("C-c r" . #'counsel-recentf)
+           ("C-c v" . #'counsel-switch-buffer-other-window)
+           ("C-h h" . #'counsel-command-history)
+           ("C-x C-f" . #'counsel-find-file)
+           :map ivy-minibuffer-map
+           ("C-r" . counsel-minibuffer-history))
+    :diminish)
 
-      (use-package counsel-projectile
-        :bind (("C-c f" . #'counsel-projectile)
-               ("C-c F" . #'counsel-projectile-switch-project)))
+  (use-package counsel-projectile
+    :bind (("C-c f" . #'counsel-projectile)
+           ("C-c F" . #'counsel-projectile-switch-project)))
 
-      ;; Make ivy stuff in minibuffer look pretty
-      (use-package ivy-rich
-        :custom
-        (ivy-virtual-abbreviate 'name)
-        (ivy-rich-switch-buffer-align-virtual-buffer nil)
-        (ivy-rich-path-style 'name)
-        :config
-        (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line)
-        (setq ivy-rich-path-style 'abbrev
-              ivy-rich-display-transformers-list
-              '(ivy-switch-buffer
-                (:columns
-                 ((ivy-rich-candidate (:width 20))
-                  (ivy-rich-switch-buffer-size (:width 7 :align right))
-                  (ivy-rich-switch-buffer-indicators
-                   (:width 2 :face error :align right))
-                  (ivy-rich-switch-buffer-major-mode (:width 12 :face warning))
-                  (ivy-rich-switch-buffer-project (:width 8 :face success))
-                  (ivy-rich-switch-buffer-path
-                   (:width (lambda (x)
-                             (ivy-rich-switch-buffer-shorten-path
-                              x (ivy-rich-minibuffer-width 0.3))))))
-                 :predicate (lambda (cand) (get-buffer cand)))
-                counsel-M-x
-                (:columns
-                 ((counsel-M-x-transformer (:width 40))
-                  (ivy-rich-counsel-function-docstring
-                   (:face font-lock-doc-face))))
-                counsel-describe-function
-                (:columns
-                 ((counsel-describe-function-transformer (:width 40))
-                  (ivy-rich-counsel-function-docstring
-                   (:face font-lock-doc-face))))
-                counsel-describe-variable
-                (:columns
-                 ((counsel-describe-variable-transformer (:width 40))
-                  (ivy-rich-counsel-variable-docstring
-                   (:face font-lock-doc-face))))
-                counsel-recentf
-                (:columns
-                 ((ivy-rich-candidate (:width 0.8))
-                  (ivy-rich-file-last-modified-time
-                   (:face font-lock-comment-face))))))
+  ;; Make ivy stuff in minibuffer look pretty
+  (use-package ivy-rich
+    :custom
+    (ivy-virtual-abbreviate 'name)
+    (ivy-rich-switch-buffer-align-virtual-buffer nil)
+    (ivy-rich-path-style 'name)
+    :config
+    (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line)
+    (setq ivy-rich-path-style 'abbrev
+          ivy-rich-display-transformers-list
+          '(ivy-switch-buffer
+            (:columns
+             ((ivy-rich-candidate (:width 20))
+              (ivy-rich-switch-buffer-size (:width 7 :align right))
+              (ivy-rich-switch-buffer-indicators
+               (:width 2 :face error :align right))
+              (ivy-rich-switch-buffer-major-mode (:width 12 :face warning))
+              (ivy-rich-switch-buffer-project (:width 8 :face success))
+              (ivy-rich-switch-buffer-path
+               (:width (lambda (x)
+                         (ivy-rich-switch-buffer-shorten-path
+                          x (ivy-rich-minibuffer-width 0.3))))))
+             :predicate (lambda (cand) (get-buffer cand)))
+            counsel-M-x
+            (:columns
+             ((counsel-M-x-transformer (:width 40))
+              (ivy-rich-counsel-function-docstring
+               (:face font-lock-doc-face))))
+            counsel-describe-function
+            (:columns
+             ((counsel-describe-function-transformer (:width 40))
+              (ivy-rich-counsel-function-docstring
+               (:face font-lock-doc-face))))
+            counsel-describe-variable
+            (:columns
+             ((counsel-describe-variable-transformer (:width 40))
+              (ivy-rich-counsel-variable-docstring
+               (:face font-lock-doc-face))))
+            counsel-recentf
+            (:columns
+             ((ivy-rich-candidate (:width 0.8))
+              (ivy-rich-file-last-modified-time
+               (:face font-lock-comment-face))))))
 
-        (ivy-rich-mode))
-
-
-      ;; Prescient and ivy-prescient
-      (use-package prescient)
-      (use-package ivy-prescient
-        :config
-        (ivy-prescient-mode t))
-      ;; Ivy Hydra
-      (use-package ivy-hydra)
+    (ivy-rich-mode))
 
 
-      ;; UI Improvements
-      ;; Modeline, Theme and Icons
+  ;; Prescient and ivy-prescient
+  (use-package prescient)
+  (use-package ivy-prescient
+    :config
+    (ivy-prescient-mode t))
+  ;; Ivy Hydra
+  (use-package ivy-hydra)
 
-    #+end_src
+
+  ;; UI Improvements
+  ;; Modeline, Theme and Icons
+
+#+end_src
 
 *** Support for Terminal - vterm
-    The best support for a terminal provided in emacs is by vterm. This code segment below is for vterm support
-    #+begin_src elisp
-      (use-package vterm
-        :ensure t)
-      (setq crux-term-buffer-name "vterm")
-      (use-package vterm-toggle
-        :ensure t
-        :config
-        (define-key vm-map (kbd "t") 'vterm-toggle)
-        (define-key vm-map (kbd "s") 'vterm-toggle-cd)
+The best support for a terminal provided in emacs is by vterm. This code segment below is for vterm support
+#+begin_src elisp
+  (use-package vterm
+    :ensure t)
+  (setq crux-term-buffer-name "vterm")
+  (use-package vterm-toggle
+    :ensure t
+    :config
+    (define-key vm-map (kbd "t") 'vterm-toggle)
+    (define-key vm-map (kbd "s") 'vterm-toggle-cd)
 
-        ;; you can cd to the directory where your previous buffer file exists
-        ;; after you have toggle to the vterm buffer with `vterm-toggle'.
-        (define-key vterm-mode-map [(control return)]   #'vterm-toggle-insert-cd)
+    ;; you can cd to the directory where your previous buffer file exists
+    ;; after you have toggle to the vterm buffer with `vterm-toggle'.
+    (define-key vterm-mode-map [(control return)]   #'vterm-toggle-insert-cd)
 
-        ;; Switch to next vterm buffer
-        (define-key vterm-mode-map (kbd "s-n")   'vterm-toggle-forward)
-        ;; Switch to previous vterm buffer
-        (define-key vterm-mode-map (kbd "s-p")   'vterm-toggle-backward)
-        )
+    ;; Switch to next vterm buffer
+    (define-key vterm-mode-map (kbd "s-n")   'vterm-toggle-forward)
+    ;; Switch to previous vterm buffer
+    (define-key vterm-mode-map (kbd "s-p")   'vterm-toggle-backward)
+    )
 
-    #+end_src
+#+end_src
 
 *** All-the-icons - support for Dired as well as modeline file icon Support
-       #+begin_src elisp
-      (use-package all-the-icons)
-      (use-package all-the-icons-dired
-        :after all-the-icons
-        :hook (dired-mode . all-the-icons-dired-mode))
-    #+end_src
+#+begin_src elisp
+  (use-package all-the-icons)
+  (use-package all-the-icons-dired
+    :after all-the-icons
+    :hook (dired-mode . all-the-icons-dired-mode))
+#+end_src
 
 *** Miscellaneous Support
-    Support for zap and beacon. Zap is to delete chars upto
-    #+begin_src elisp
-      ;; Delete to a char.
-      (use-package zop-to-char
-        :init
-        (global-set-key [remap zap-to-char] 'zop-to-char))
+Support for zap and beacon. Zap is to delete chars upto
+#+begin_src elisp
+  ;; Delete to a char.
+  (use-package zop-to-char
+    :init
+    (global-set-key [remap zap-to-char] 'zop-to-char))
 
-      ;; Flash the line on a context change.
-      (use-package beacon
-        :config
-        (beacon-mode 1))
+  ;; Flash the line on a context change.
+  (use-package beacon
+    :config
+    (beacon-mode 1))
     #+end_src
 
 
 ** Modeline support
 *** Support for doom Modeline
-    Support for modeline for emacs.
+Support for modeline for emacs.
     #+begin_src elisp
-      (use-package doom-modeline
-        :ensure t
-        :init (doom-modeline-mode 1)
-        :config
-        (setq doom-modeline-lsp t)
-        (setq doom-modeline-minor-modes t)
-        (setq doom-modeline-project-detection 'projectile)
-        (setq doom-modeline-continuous-word-count-modes '(markdown-mode gfm-mode org-mode))
-        ;; Whether display the buffer encoding.
-        (setq doom-modeline-buffer-encoding nil)
-        (setq doom-modeline-env-version t)
-        (setq doom-modeline-env-enable-python t))
+  (use-package doom-modeline
+    :ensure t
+    :init (doom-modeline-mode 1)
+    :config
+    (setq doom-modeline-lsp t)
+    (setq doom-modeline-minor-modes t)
+    (setq doom-modeline-project-detection 'projectile)
+    (setq doom-modeline-continuous-word-count-modes '(markdown-mode gfm-mode org-mode))
+    ;; Whether display the buffer encoding.
+    (setq doom-modeline-buffer-encoding nil)
+    (setq doom-modeline-env-version t)
+    (setq doom-modeline-env-enable-python t))
 
-      ;; =======================================================
-      ;; Minor mode menu for mode-line
-      ;; =======================================================
-      (use-package minions
-        :config
-        (minions-mode 1)
-        (global-set-key [S-down-mouse-3] 'minions-minor-modes-menu))
+  ;; =======================================================
+  ;; Minor mode menu for mode-line
+  ;; =======================================================
+  (use-package minions
+    :config
+    (minions-mode 1)
+    (global-set-key [S-down-mouse-3] 'minions-minor-modes-menu))
 
-      (use-package diminish
-        :config (diminish 'eldoc-mode))
-    #+end_src
+  (use-package diminish
+    :config (diminish 'eldoc-mode))
+#+end_src
 
 ** Support for search
 *** Support Search
-    Support for searching programs.
+Support for searching programs.
     #+begin_src elisp
-      (use-package fzf)
-      (use-package ag
-        :ensure t
-        :commands (ag ag-regexp ag-project))
+  (use-package fzf)
+  (use-package ag
+    :ensure t
+    :commands (ag ag-regexp ag-project))
 
-      (use-package ripgrep)
-      ;; Deadgrep is the best way to search in a repo
-      (use-package deadgrep
-        :bind (("C-c h" . #'deadgrep)))
-      ;; Visual reegular expressions. This is the boss
-      (use-package visual-regexp
-        :bind (("C-c 5" . #'vr/replace)))
+  (use-package ripgrep)
+  ;; Deadgrep is the best way to search in a repo
+  (use-package deadgrep
+    :bind (("C-c h" . #'deadgrep)))
+  ;; Visual reegular expressions. This is the boss
+  (use-package visual-regexp
+    :bind (("C-c 5" . #'vr/replace)))
     #+end_src
 
 ** Programming Support
 *** Treemacs Support
-    Treemacs is like a buffer list or file list plugin for the Emacs. The code below enables it.
+Treemacs is like a buffer list or file list plugin for the Emacs. The code below enables it.
 
     #+begin_src elisp
-      (use-package treemacs
-        :config
-        (setq treemacs-width 25
-              treemacs-follow-mode -1
-              treemacs-tag-follow-mode -1
-              treemacs-is-never-other-window t
-              treemacs-follow-after-init t
-              treemacs-icon-open-png   (propertize "⊖ " 'face 'treemacs-directory-face)
-              treemacs-icon-closed-png (propertize "⊕ " 'face 'treemacs-directory-face))
-        (define-key treemacs-mode-map [mouse-1]
-          #'treemacs-single-click-expand-action)
-        :bind ( "M-0" . treemacs-select-window)
-        )
+  (use-package treemacs
+    :config
+    (setq treemacs-width 25
+          treemacs-follow-mode -1
+          treemacs-tag-follow-mode -1
+          treemacs-is-never-other-window t
+          treemacs-follow-after-init t
+          treemacs-icon-open-png   (propertize "⊖ " 'face 'treemacs-directory-face)
+          treemacs-icon-closed-png (propertize "⊕ " 'face 'treemacs-directory-face))
+    (define-key treemacs-mode-map [mouse-1]
+                #'treemacs-single-click-expand-action)
+    :bind ( "M-0" . treemacs-select-window)
+    )
 
-      (setq treemacs-autopeek-mode nil)
+  (setq treemacs-autopeek-mode nil)
 
-      (defun treemacs-toggle-autopeek ()
-        (interactive)
-        (if treemacs-autopeek-mode
-            (progn
-              (setq treemacs-autopeek-mode nil)
-              (message "Treemacs autopeek: OFF"))
-          (setq treemacs-autopeek-mode t)
-          (message "Treemacs autopeek: ON")))
+  (defun treemacs-toggle-autopeek ()
+    (interactive)
+    (if treemacs-autopeek-mode
+        (progn
+          (setq treemacs-autopeek-mode nil)
+          (message "Treemacs autopeek: OFF"))
+      (setq treemacs-autopeek-mode t)
+      (message "Treemacs autopeek: ON")))
 
-      (use-package treemacs-projectile)
-      (use-package treemacs-magit)
+  (use-package treemacs-projectile)
+  (use-package treemacs-magit)
     #+end_src
 
 *** Tree sitter mode
-    Tree sitter supports finer grained parsing system. It is supposed to
-    understand the code structurally. Adding support for tree-sitter and also
-    enabling it for python.
+Tree sitter supports finer grained parsing system. It is supposed to
+understand the code structurally. Adding support for tree-sitter and also
+enabling it for python.
 
     #+begin_src elisp
-      (use-package tree-sitter)
-      (use-package tree-sitter-langs)
-      (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
-      ;; Enable tree-sitter mode for all supported modes.
-      (global-tree-sitter-mode)
+  (use-package tree-sitter)
+  (use-package tree-sitter-langs)
+  (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
+  ;; Enable tree-sitter mode for all supported modes.
+  (global-tree-sitter-mode)
     #+end_src
 
 *** Version Control Support
-    Magit is the best support program for Emacs. And git gutter is used to show
-    the lines that have changed in the gutter. Very handy.
+Magit is the best support program for Emacs. And git gutter is used to show
+the lines that have changed in the gutter. Very handy.
 
     #+begin_src elisp
-      ;; Magit
-      (use-package magit
-        :bind ("C-x g" . magit-status))
+  ;; Magit
+  (use-package magit
+    :bind ("C-x g" . magit-status))
 
-      (use-package git-gutter
-        :config
-        (global-git-gutter-mode 't))
+  (use-package git-gutter
+    :config
+    (global-git-gutter-mode 't))
     #+end_src
 
 *** General Programming configuration - LSP, DAP
-    This is the generic support for LSP and DAP. LSP is the global Languager
-    server project that makes Emacs even more attractive. DAP is the debug
-    adapter protocol. And helps in having debugger working with a modern UI from
-    within Emacs.
+This is the generic support for LSP and DAP. LSP is the global Languager
+server project that makes Emacs even more attractive. DAP is the debug
+adapter protocol. And helps in having debugger working with a modern UI from
+within Emacs.
 
     #+begin_src elisp
-      (use-package lsp-mode
-        :init
-        ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
-        (setq lsp-keymap-prefix "s-l")
-        :config
-        (lsp-register-custom-settings
-         '(("pyls.plugins.pyls_mypy.enabled" t t)
-           ("pyls.plugins.pyls_mypy.live_mode" nil t)
-           ("pyls.plugins.pyls_black.enabled" t t)
-           ("pyls.plugins.pyls_isort.enabled" t t)))
-        :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
-               ;; if you want which-key integration
-               (lsp-mode . lsp-enable-which-key-integration))
-        :commands lsp)
-      (use-package lsp-ui
-        :config
-        (define-key lsp-ui-mode-map [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
-        (define-key lsp-ui-mode-map [remap xref-find-references] #'lsp-ui-peek-find-references)
-        (setq lsp-ui-sideline-enable t
-              lsp-ui-sideline-update-mode 'line
-              lsp-ui-sideline-show-code-actions t
-              lsp-ui-sideline-show-hover nil
-              lsp-ui-doc-enable t
-              lsp-ui-doc-include-signature t
-              lsp-eldoc-enable-hover t ; Disable eldoc displays in minibuffer
-              lsp-ui-imenu-enable t
-              lsp-ui-peek-always-show t
-              lsp-ui-sideline-ignore-duplicate t
-              lsp-headerline-breadcrumb-enable t))
+  (use-package lsp-mode
+    :init
+    ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
+    (setq lsp-keymap-prefix "s-l")
+    :config
+    (lsp-register-custom-settings
+     '(("pyls.plugins.pyls_mypy.enabled" t t)
+       ("pyls.plugins.pyls_mypy.live_mode" nil t)
+       ("pyls.plugins.pyls_black.enabled" t t)
+       ("pyls.plugins.pyls_isort.enabled" t t)))
+    :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
+           ;; if you want which-key integration
+           (lsp-mode . lsp-enable-which-key-integration))
+    :commands lsp)
+  (use-package lsp-ui
+    :config
+    (define-key lsp-ui-mode-map [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
+    (define-key lsp-ui-mode-map [remap xref-find-references] #'lsp-ui-peek-find-references)
+    (setq lsp-ui-sideline-enable t
+          lsp-ui-sideline-update-mode 'line
+          lsp-ui-sideline-show-code-actions t
+          lsp-ui-sideline-show-hover nil
+          lsp-ui-doc-enable t
+          lsp-ui-doc-include-signature t
+          lsp-eldoc-enable-hover t ; Disable eldoc displays in minibuffer
+          lsp-ui-imenu-enable t
+          lsp-ui-peek-always-show t
+          lsp-ui-sideline-ignore-duplicate t
+          lsp-headerline-breadcrumb-enable t))
 
-      ;; if you are ivy user
-      (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
-      (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
-      (lsp-treemacs-sync-mode 1)
+  ;; if you are ivy user
+  (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
+  (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+  (lsp-treemacs-sync-mode 1)
 
-      (use-package dap-mode
-        :config
-        (setq dap-auto-configure-features '(sessions locals controls tooltip))
-        (dap-ui-mode 1)
-        ;; enables mouse hover support
-        (dap-tooltip-mode 1)
-        ;; use tooltips for mouse hover
-        ;; if it is not enabled `dap-mode' will use the minibuffer.
-        (tooltip-mode 1)
-        ;; displays floating panel with debug buttons
-        ;; requies emacs 26+
-        (dap-ui-controls-mode 1)
-        )
+  (use-package dap-mode
+    :config
+    (setq dap-auto-configure-features '(sessions locals controls tooltip))
+    (dap-ui-mode 1)
+    ;; enables mouse hover support
+    (dap-tooltip-mode 1)
+    ;; use tooltips for mouse hover
+    ;; if it is not enabled `dap-mode' will use the minibuffer.
+    (tooltip-mode 1)
+    ;; displays floating panel with debug buttons
+    ;; requies emacs 26+
+    (dap-ui-controls-mode 1)
+    )
     #+end_src
 
 *** Completion support - Company
-    This section supports the completion method using company.
+This section supports the completion method using company.
     #+begin_src elisp
-      (use-package company
-        :ensure company-box
-        :init
-        (global-company-mode t)
-        (global-set-key (kbd "M-/") 'company-complete)
+  (use-package company
+    :ensure company-box
+    :init
+    (global-company-mode t)
+    (global-set-key (kbd "M-/") 'company-complete)
 
-        ;; (add-hook 'comint-mode-hook 'company-mode)
-        :config
-        (setq company-tooltip-limit 10)
-        (setq company-dabbrev-downcase 0)
-        (setq company-idle-delay 0)
-        (setq company-echo-delay 0.1)
-        (setq company-minimum-prefix-length 2)
-        (setq company-require-match nil)
-        (setq company-selection-wrap-around t)
-        (setq company-tooltip-align-annotations t)
-        (setq company-show-numbers t)
-        ;; (setq company-tooltip-flip-when-above t)
-        (setq company-transformers '(company-sort-by-occurrence)) ; weight by frequency
-        (define-key company-active-map (kbd "M-n") nil)
-        (define-key company-active-map (kbd "M-p") nil)
-        (define-key company-active-map (kbd "C-n") 'company-select-next)
-        (define-key company-active-map (kbd "C-p") 'company-select-previous)
-        (define-key company-active-map (kbd "TAB") 'company-complete-common-or-cycle)
-        (define-key company-active-map (kbd "<tab>") 'company-complete-common-or-cycle)
-        (define-key company-active-map (kbd "S-TAB") 'company-select-previous)
-        (define-key company-active-map (kbd "<backtab>") 'company-select-previous))
+    ;; (add-hook 'comint-mode-hook 'company-mode)
+    :config
+    (setq company-tooltip-limit 10)
+    (setq company-dabbrev-downcase 0)
+    (setq company-idle-delay 0)
+    (setq company-echo-delay 0.1)
+    (setq company-minimum-prefix-length 2)
+    (setq company-require-match nil)
+    (setq company-selection-wrap-around t)
+    (setq company-tooltip-align-annotations t)
+    (setq company-show-numbers t)
+    ;; (setq company-tooltip-flip-when-above t)
+    (setq company-transformers '(company-sort-by-occurrence)) ; weight by frequency
+    (define-key company-active-map (kbd "M-n") nil)
+    (define-key company-active-map (kbd "M-p") nil)
+    (define-key company-active-map (kbd "C-n") 'company-select-next)
+    (define-key company-active-map (kbd "C-p") 'company-select-previous)
+    (define-key company-active-map (kbd "TAB") 'company-complete-common-or-cycle)
+    (define-key company-active-map (kbd "<tab>") 'company-complete-common-or-cycle)
+    (define-key company-active-map (kbd "S-TAB") 'company-select-previous)
+    (define-key company-active-map (kbd "<backtab>") 'company-select-previous))
 
-      (use-package company-box
-        :ensure frame-local
-        :hook (company-mode . company-box-mode))
+  (use-package company-box
+    :ensure frame-local
+    :hook (company-mode . company-box-mode))
 
-      ;; Enable tabnine based AI completion
-      ;; Tabnine company
-      (use-package company-tabnine :ensure t)
-      (add-to-list 'company-backends #'company-tabnine)
+  ;; Enable tabnine based AI completion
+  ;; Tabnine company
+  (use-package company-tabnine :ensure t)
+  (add-to-list 'company-backends #'company-tabnine)
     #+end_src
 
 *** Programming support - Snippets
-    Using yasnippet to support the programming templates.
+Using yasnippet to support the programming templates.
     #+begin_src elisp
-      (use-package yasnippet
-        :config
-        (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
-        (yas-global-mode 1))
-      (use-package yasnippet-snippets)
+  (use-package yasnippet
+    :config
+    (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
+    (yas-global-mode 1))
+  (use-package yasnippet-snippets)
     #+end_src
 
 *** Enable insertion of the shebang automatically
 
     #+begin_src elisp
-      (use-package insert-shebang)
-      (setq insert-shebang-file-types
-         '(("py" . "python3")
-           ("groovy" . "groovy")
-           ("fish" . "fish")
-           ("robot" . "robot")
-           ("rb" . "ruby")
-           ("lua" . "lua")
-           ("php" . "php")
-           ("sh" . "bash")
-           ("pl" . "perl")
-           ("raku" . "raku")))
-      (add-hook 'after-save-hook
-                'executable-make-buffer-file-executable-if-script-p)
+  (use-package insert-shebang)
+  (setq insert-shebang-file-types
+        '(("py" . "python3")
+          ("groovy" . "groovy")
+          ("fish" . "fish")
+          ("robot" . "robot")
+          ("rb" . "ruby")
+          ("lua" . "lua")
+          ("php" . "php")
+          ("sh" . "bash")
+          ("pl" . "perl")
+          ("raku" . "raku")))
+  (add-hook 'after-save-hook
+            'executable-make-buffer-file-executable-if-script-p)
     #+end_src
 
 
 ** Programming Language support
 *** Programming Support - Python
-    For python we will use the pyright language server. The code below sets up
-    the pyright language server and the support for blacken etc for overall
-    python support.
+For python we will use the pyright language server. The code below sets up
+the pyright language server and the support for blacken etc for overall
+python support.
 
     #+begin_src elisp
-      ;; Enable pyright support
-      (use-package lsp-pyright
-        :hook
-        (python-mode . (lambda ()
-                         (require 'lsp-pyright)
-                         (lsp))))
+  ;; Enable pyright support
+  (use-package lsp-pyright
+    :hook
+    (python-mode . (lambda ()
+                     (require 'lsp-pyright)
+                     (lsp))))
 
-      ;; Use blacken for python formatting
-      (use-package blacken
-        :config
-        (add-hook 'python-mode-hook 'blacken-mode))
-      (setq python-shell-interpreter "/Users/vikasmis/anaconda/bin/python3")
+  ;; Use blacken for python formatting
+  (use-package blacken
+    :config
+    (add-hook 'python-mode-hook 'blacken-mode))
+  (setq python-shell-interpreter "/Users/vikasmis/anaconda/bin/python3")
 
-      ;; Enable dap for python
-      (require 'dap-python)
+  ;; Enable dap for python
+  (require 'dap-python)
     #+end_src
 
 *** Support for my shell environments - zsh and fish
-    Zsh, bash etc are supported by default. Fish isn't. The code below supports that.
+Zsh, bash etc are supported by default. Fish isn't. The code below supports that.
 
     #+begin_src elisp
-      (use-package fish-mode)
+  (use-package fish-mode)
     #+end_src
 
 
 ** Conveniences - support for other modes.
 *** Which key
-    This mode is a life saver. This helps in discovery of the keyboard shortcuts so well. Adding it here.
+This mode is a life saver. This helps in discovery of the keyboard shortcuts so well. Adding it here.
     #+begin_src elisp
-      (use-package which-key
-        :config
-        (which-key-mode)
-        :custom
-        (which-key-idle-delay 0.3))
+  (use-package which-key
+    :config
+    (which-key-mode)
+    :custom
+    (which-key-idle-delay 0.3))
     #+end_src
 
 *** Emacs undo-fu
-    Undo-fu allows both undo and redo in Emacs. Here is the code to enable undo-fu. This
+Undo-fu allows both undo and redo in Emacs. Here is the code to enable undo-fu. This
     #+begin_src elisp
-      (use-package undo-fu
-        :config
-        (global-unset-key (kbd "C-z"))
-        (global-set-key (kbd "C-z")   'undo-fu-only-undo)
-        (global-set-key (kbd "C-S-z") 'undo-fu-only-redo))
+  (use-package undo-fu
+    :config
+    (global-unset-key (kbd "C-z"))
+    (global-set-key (kbd "C-z")   'undo-fu-only-undo)
+    (global-set-key (kbd "C-S-z") 'undo-fu-only-redo))
     #+end_src
 
 *** Moving windows
-    I use three key modes here =windmove=, =ace-window= and =winnum=
-    mode. Perhaps an overkill to have all of them, but I have added them just in
-    case I decide to use one of them. I am sure once I use regularly, I can
-    decide to narrow down to only one or two at the most.
+I use three key modes here =windmove=, =ace-window= and =winnum=
+mode. Perhaps an overkill to have all of them, but I have added them just in
+case I decide to use one of them. I am sure once I use regularly, I can
+decide to narrow down to only one or two at the most.
 
     #+begin_src elisp
-      (use-package ace-window
-        :config
-        ;; Show the window designators in the modeline.
-        (ace-window-display-mode)
-        ;; Make the number indicators a little larger. I'm getting old.
-        (set-face-attribute 'aw-leading-char-face nil :height 4.0 :background "black")
-        (defun my-ace-window (args)
-          "As ace-window, but hiding the cursor while the action is active."
-          (interactive "P")
-          (cl-letf
-              ((cursor-type nil)
-               (cursor-in-non-selected-window nil))
-            (ace-window nil)))
-        :bind (("C-," . my-ace-window))
-        :custom
-        (aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l) "Designate windows by home row keys, not numbers.")
-        (aw-background nil))
+  (use-package ace-window
+    :config
+    ;; Show the window designators in the modeline.
+    (ace-window-display-mode)
+    ;; Make the number indicators a little larger. I'm getting old.
+    (set-face-attribute 'aw-leading-char-face nil :height 4.0 :background "black")
+    (defun my-ace-window (args)
+      "As ace-window, but hiding the cursor while the action is active."
+      (interactive "P")
+      (cl-letf
+          ((cursor-type nil)
+           (cursor-in-non-selected-window nil))
+        (ace-window nil)))
+    :bind (("C-," . my-ace-window))
+    :custom
+    (aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l) "Designate windows by home row keys, not numbers.")
+    (aw-background nil))
 
-      ;; Enable moving with super
-      (windmove-default-keybindings 'super)
-      ;; wrap around at edges
-      (setq windmove-wrap-around t)
+  ;; Enable moving with super
+  (windmove-default-keybindings 'super)
+  ;; wrap around at edges
+  (setq windmove-wrap-around t)
 
-      ;; Using winnum to move the windows.
-      (use-package winum
-        :config
-        (define-key winum-keymap (kbd "M-0") #'treemacs-select-window)
-        (define-key winum-keymap (kbd "M-1") 'winum-select-window-1)
-        (define-key winum-keymap (kbd "M-2") 'winum-select-window-2)
-        (define-key winum-keymap (kbd "M-3") 'winum-select-window-3)
-        (define-key winum-keymap (kbd "M-4") 'winum-select-window-4)
-        (define-key winum-keymap (kbd "M-5") 'winum-select-window-5)
-        (define-key winum-keymap (kbd "M-6") 'winum-select-window-6)
-        (define-key winum-keymap (kbd "M-7") 'winum-select-window-7)
-        (define-key winum-keymap (kbd "M-8") 'winum-select-window-8)
-        (define-key winum-keymap (kbd "M-9") 'winum-select-window-9)
-        (define-key winum-keymap (kbd "C-`") 'winum-select-window-by-number)
-        (winum-mode)
-      )
-    #+end_src
+  ;; Using winnum to move the windows.
+  (use-package winum
+    :config
+    (define-key winum-keymap (kbd "M-0") #'treemacs-select-window)
+    (define-key winum-keymap (kbd "M-1") 'winum-select-window-1)
+    (define-key winum-keymap (kbd "M-2") 'winum-select-window-2)
+    (define-key winum-keymap (kbd "M-3") 'winum-select-window-3)
+    (define-key winum-keymap (kbd "M-4") 'winum-select-window-4)
+    (define-key winum-keymap (kbd "M-5") 'winum-select-window-5)
+    (define-key winum-keymap (kbd "M-6") 'winum-select-window-6)
+    (define-key winum-keymap (kbd "M-7") 'winum-select-window-7)
+    (define-key winum-keymap (kbd "M-8") 'winum-select-window-8)
+    (define-key winum-keymap (kbd "M-9") 'winum-select-window-9)
+    (define-key winum-keymap (kbd "C-`") 'winum-select-window-by-number)
+    (winum-mode)
+    )
+#+end_src
 
 *** My custom Methods
-    There are three methods listed here - =split-and-follow-vertically=,
-    =split-and-follow-horizontally= and =toggle-window-split=. The vertical and
-    horizontal split functions do what you would expect, except that they jump to
-    those windows after splitting. The
+There are three methods listed here - =split-and-follow-vertically=,
+=split-and-follow-horizontally= and =toggle-window-split=. The vertical and
+horizontal split functions do what you would expect, except that they jump to
+those windows after splitting. The
 
-    The =toggle-window-split= method, toggles vertical split to horizontal and
-    horizontal split to vertical.
+The =toggle-window-split= method, toggles vertical split to horizontal and
+horizontal split to vertical.
 
-    #+begin_src elisp
-      (defun split-and-follow-horizontally ()
-        (interactive)
-        (split-window-below)
-        (balance-windows)
-        (other-window 1))
-      (global-set-key (kbd "C-x 2") 'split-and-follow-horizontally)
+#+begin_src elisp
+  (defun split-and-follow-horizontally ()
+    (interactive)
+    (split-window-below)
+    (balance-windows)
+    (other-window 1))
+  (global-set-key (kbd "C-x 2") 'split-and-follow-horizontally)
 
-      (defun split-and-follow-vertically ()
-        (interactive)
-        (split-window-right)
-        (balance-windows)
-        (other-window 1))
-      (global-set-key (kbd "C-x 3") 'split-and-follow-vertically)
+  (defun split-and-follow-vertically ()
+    (interactive)
+    (split-window-right)
+    (balance-windows)
+    (other-window 1))
+  (global-set-key (kbd "C-x 3") 'split-and-follow-vertically)
 
-      ;; My function to enable swapping from vertical split to horizontal split
-      (defun toggle-window-split ()
-        (interactive)
-        (if (= (count-windows) 2)
-            (let* ((this-win-buffer (window-buffer))
-                   (next-win-buffer (window-buffer (next-window)))
-                   (this-win-edges (window-edges (selected-window)))
-                   (next-win-edges (window-edges (next-window)))
-                   (this-win-2nd (not (and (<= (car this-win-edges)
-                                               (car next-win-edges))
-                                           (<= (cadr this-win-edges)
-                                               (cadr next-win-edges)))))
-                   (splitter
-                    (if (= (car this-win-edges)
-                           (car (window-edges (next-window))))
-                        'split-window-horizontally
-                      'split-window-vertically)))
-              (delete-other-windows)
-              (let ((first-win (selected-window)))
-                (funcall splitter)
-                (if this-win-2nd (other-window 1))
-                (set-window-buffer (selected-window) this-win-buffer)
-                (set-window-buffer (next-window) next-win-buffer)
-                (select-window first-win)
-                (if this-win-2nd (other-window 1))))))
+  ;; My function to enable swapping from vertical split to horizontal split
+  (defun toggle-window-split ()
+    (interactive)
+    (if (= (count-windows) 2)
+        (let* ((this-win-buffer (window-buffer))
+               (next-win-buffer (window-buffer (next-window)))
+               (this-win-edges (window-edges (selected-window)))
+               (next-win-edges (window-edges (next-window)))
+               (this-win-2nd (not (and (<= (car this-win-edges)
+                                           (car next-win-edges))
+                                       (<= (cadr this-win-edges)
+                                           (cadr next-win-edges)))))
+               (splitter
+                (if (= (car this-win-edges)
+                       (car (window-edges (next-window))))
+                    'split-window-horizontally
+                  'split-window-vertically)))
+          (delete-other-windows)
+          (let ((first-win (selected-window)))
+            (funcall splitter)
+            (if this-win-2nd (other-window 1))
+            (set-window-buffer (selected-window) this-win-buffer)
+            (set-window-buffer (next-window) next-win-buffer)
+            (select-window first-win)
+            (if this-win-2nd (other-window 1))))))
 
-    #+end_src
+#+end_src
 
 *** Show line numbers
-    Show me line numbers in buffers - but don't show these line numbers in either vterm or in treemacs.
+Show me line numbers in buffers - but don't show these line numbers in either vterm or in treemacs.
 
-    #+begin_src elisp
-      ;; Line numbers
-      (global-display-line-numbers-mode 1)
-      (defun display-line-numbers-disable-hook ()
-        "Disable display-line-numbers locally."
-        (display-line-numbers-mode -1))
-      ;; Disable it for treemacs and vterm
-      ;; Disable line-numbers minor mode for neotree
-      (add-hook 'treemacs-mode-hook 'display-line-numbers-disable-hook)
-      (add-hook 'vterm-mode-hook 'display-line-numbers-disable-hook)
+#+begin_src elisp
+  ;; Line numbers
+  (global-display-line-numbers-mode 1)
+  (defun display-line-numbers-disable-hook ()
+    "Disable display-line-numbers locally."
+    (display-line-numbers-mode -1))
+  ;; Disable it for treemacs and vterm
+  ;; Disable line-numbers minor mode for neotree
+  (add-hook 'treemacs-mode-hook 'display-line-numbers-disable-hook)
+  (add-hook 'vterm-mode-hook 'display-line-numbers-disable-hook)
 
-    #+end_src
+#+end_src
 
 *** IELM - Emacs Lisp REPL
-    IELM is the REPL for the Emacs lisp code. This is a must do.
-    #+begin_src elisp
-      (use-package ielm
-             :commands ielm
-             :init
-             (defun ielm-start-process (&rest args)
-               "Start a process in a new buffer"
-               (let ((progname (car args)))
-                 (apply 'start-process progname (concat "*" progname "*") args))))
+IELM is the REPL for the Emacs lisp code. This is a must do.
+#+begin_src elisp
+  (use-package ielm
+    :commands ielm
+    :init
+    (defun ielm-start-process (&rest args)
+      "Start a process in a new buffer"
+      (let ((progname (car args)))
+        (apply 'start-process progname (concat "*" progname "*") args))))
     #+end_src
 
 
@@ -837,9 +835,9 @@
 
 This is perhaps the most important section in the entire config file. This is because this deals with the org mode stuff that I use.
 #+begin_src elisp
-
   ;; Org mode configuration
   (use-package org
+  	:straight (:type built-in)
     :ensure t
     :defer nil
     :custom
@@ -938,11 +936,11 @@ This is perhaps the most important section in the entire config file. This is be
   ;; I want to open org link in other windows - not the same window.
   (setf (alist-get 'file org-link-frame-setup) #'find-file-other-window)
 
-  (setq org-roam-directory (file-truename org-directory))
+  (setq org-roam-directory (file-truename "~/Documents/OrgNotes/roam"))
   ;; Configure org-roam
   (use-package org-roam
     :straight (:host github :repo "org-roam/org-roam"
-             :files (:defaults "extensions/*"))
+                     :files (:defaults "extensions/*"))
     :after org
     :defer nil
     :ensure t
@@ -1026,32 +1024,32 @@ This is perhaps the most important section in the entire config file. This is be
 
 ** Colors, UI and the fonts
 *** Helpful
-    Helpul mode for expanded help functions.
+Helpul mode for expanded help functions.
     #+begin_src elisp
-      (use-package helpful
-        :bind
-        (("C-h f" . helpful-callable)
-         ("C-h v" . helpful-variable)
-         ("C-h k" . helpful-key)
-         ("C-c C-d" . helpful-at-point)
-         ("C-h F" . helpful-function)
-         ("C-h C" . helpful-comman)
-         )
-        :config
-        (setq counsel-describe-function-function #'helpful-callable)
-        (setq counsel-describe-variable-function #'helpful-variable)
-        )
+  (use-package helpful
+    :bind
+    (("C-h f" . helpful-callable)
+     ("C-h v" . helpful-variable)
+     ("C-h k" . helpful-key)
+     ("C-c C-d" . helpful-at-point)
+     ("C-h F" . helpful-function)
+     ("C-h C" . helpful-comman)
+     )
+    :config
+    (setq counsel-describe-function-function #'helpful-callable)
+    (setq counsel-describe-variable-function #'helpful-variable)
+    )
     #+end_src
 
 *** Favorite Color Theme - Tommorrow Night Bright
     #+begin_src elisp
-      (use-package color-theme-sanityinc-tomorrow
-        :ensure t
-        :defer t)
-      (load-theme 'sanityinc-tomorrow-bright t)
+  (use-package color-theme-sanityinc-tomorrow
+    :ensure t
+    :defer t)
+  (load-theme 'sanityinc-tomorrow-bright t)
     #+end_src
 
 *** Final UI - font
     #+begin_src elisp
-      (set-frame-font "CaskaydiaCove Nerd Font 18"  nil t)
-    #+end_src
+  (set-frame-font "CaskaydiaCove Nerd Font 18"  nil t)
+#+end_src
