@@ -205,6 +205,12 @@ productive. Here are these - most of them are pretty self explanatory.
   (global-set-key (kbd "C-c") 'vm-map)
     #+end_src
 
+*** General for doing keybindings
+You can use general mode for doing keybindings. This can also be integrated with the use-package mode.
+#+begin_src elisp
+  (use-package general)
+#+end_src
+
 *** Crux Mode
 
 Crux mode provides a lot of good configuration options that are very
@@ -264,104 +270,210 @@ ivy-rich, counsel and prescient make it a pretty complete package. More
 details can be found about ivy at [[https://github.com/abo-abo/swiper][Ivy Github Page]].
 
     #+begin_src elisp
-  ;; =======================================================
-  ;; Ivy command completion framework
-  ;; Ivy, Ivy Rich, Counsel and Swiper
-  ;; =======================================================
-  (use-package ivy
-    :diminish
+  (use-package vertico
+    :demand t                             ; Otherwise won't get loaded immediately
+    :straight (vertico :files (:defaults "extensions/*") ; Special recipe to load extensions conveniently
+                       :includes (vertico-indexed
+                                  vertico-flat
+                                  vertico-grid
+                                  vertico-mouse
+                                  vertico-quick
+                                  vertico-buffer
+                                  vertico-repeat
+                                  vertico-reverse
+                                  vertico-directory
+                                  vertico-multiform
+                                  vertico-unobtrusive
+                                  ))
+    :general
+    (:keymaps '(normal insert visual motion)
+              "M-." #'vertico-repeat
+              )
+    (:keymaps 'vertico-map
+              "<tab>" #'vertico-insert ; Set manually otherwise setting `vertico-quick-insert' overrides this
+              "<escape>" #'minibuffer-keyboard-quit
+              "?" #'minibuffer-completion-help
+              "C-M-n" #'vertico-next-group
+              "C-M-p" #'vertico-previous-group
+              ;; Multiform toggles
+              "<backspace>" #'vertico-directory-delete-char
+              "C-w" #'vertico-directory-delete-word
+              "C-<backspace>" #'vertico-directory-delete-word
+              "RET" #'vertico-directory-enter
+              "C-i" #'vertico-quick-insert
+              "C-o" #'vertico-quick-exit
+              "M-o" #'kb/vertico-quick-embark
+              "M-G" #'vertico-multiform-grid
+              "M-F" #'vertico-multiform-flat
+              "M-R" #'vertico-multiform-reverse
+              "M-U" #'vertico-multiform-unobtrusive
+              "C-l" #'kb/vertico-multiform-flat-toggle
+              )
+    :hook ((rfn-eshadow-update-overlay . vertico-directory-tidy) ; Clean up file path when typing
+           (minibuffer-setup . vertico-repeat-save) ; Make sure vertico state is saved
+           )
     :custom
-    (ivy-height 15)
-    (ivy-count-format "(%d/%d) ")
-    (ivy-use-virtual-buffers t)
-    (ivy-use-selectable-prompt t)
-    :config
-    (ivy-mode 1)
-
-    :bind (("C-c C-r" . #'ivy-resume)
-           ("C-c s"   . #'swiper-thing-at-point)
-           ("C-s"     . #'swiper)))
-
-  ;; Counsel package
-  (use-package counsel
+    (vertico-count 13)
+    (vertico-resize t)
+    (vertico-cycle nil)
+    ;; Extensions
+    (vertico-grid-separator "       ")
+    (vertico-grid-lookahead 50)
+    (vertico-buffer-display-action '(display-buffer-reuse-window))
+    (vertico-multiform-categories
+     '((file reverse)
+       (consult-grep buffer)
+       (consult-location)
+       (imenu buffer)
+       (library reverse indexed)
+       (org-roam-node reverse indexed)
+       (t reverse)
+       ))
+    (vertico-multiform-commands
+     '(("flyspell-correct-*" grid reverse)
+       (org-refile grid reverse indexed)
+       (consult-yank-pop indexed)
+       (consult-flycheck)
+       (consult-lsp-diagnostics)
+       ))
     :init
-    (counsel-mode 1)
+    (defun kb/vertico-multiform-flat-toggle ()
+      "Toggle between flat and reverse."
+      (interactive)
+      (vertico-multiform--display-toggle 'vertico-flat-mode)
+      (if vertico-flat-mode
+          (vertico-multiform--temporary-mode 'vertico-reverse-mode -1)
+        (vertico-multiform--temporary-mode 'vertico-reverse-mode 1)))
+    (defun kb/vertico-quick-embark (&optional arg)
+      "Embark on candidate using quick keys."
+      (interactive)
+      (when (vertico-quick-jump)
+        (embark-act arg)))
 
-    :bind (("C-x C-m" . #'counsel-M-x)
-           ("C-c U" . #'counsel-unicode-char)
-           ("C-c i" . #'counsel-imenu)
-           ("C-x f" . #'counsel-find-file)
-           ("C-c y" . #'counsel-yank-pop)
-           ("C-c r" . #'counsel-recentf)
-           ("C-c v" . #'counsel-switch-buffer-other-window)
-           ("C-h h" . #'counsel-command-history)
-           ("C-x C-f" . #'counsel-find-file)
-           :map ivy-minibuffer-map
-           ("C-r" . counsel-minibuffer-history))
-    :diminish)
+    ;; Workaround for problem with `tramp' hostname completions. This overrides
+    ;; the completion style specifically for remote files! See
+    ;; https://github.com/minad/vertico#tramp-hostname-completion
+    (defun kb/basic-remote-try-completion (string table pred point)
+      (and (vertico--remote-p string)
+           (completion-basic-try-completion string table pred point)))
+    (defun kb/basic-remote-all-completions (string table pred point)
+      (and (vertico--remote-p string)
+           (completion-basic-all-completions string table pred point)))
+    (add-to-list 'completion-styles-alist
+                 '(basic-remote           ; Name of `completion-style'
+                   kb/basic-remote-try-completion kb/basic-remote-all-completions nil))
+    :config
+    (vertico-mode)
+    ;; Extensions
+    (vertico-multiform-mode)
 
-  (use-package counsel-projectile
-    :bind (("C-c f" . #'counsel-projectile)
-           ("C-c F" . #'counsel-projectile-switch-project)))
+    ;; Prefix the current candidate with “» ”. From
+    ;; https://github.com/minad/vertico/wiki#prefix-current-candidate-with-arrow
+    (advice-add #'vertico--format-candidate :around
+                (lambda (orig cand prefix suffix index _start)
+                  (setq cand (funcall orig cand prefix suffix index _start))
+                  (concat
+                   (if (= vertico--index index)
+                       (propertize "» " 'face 'vertico-current)
+                     "  ")
+                   cand)))
+    )
 
-  ;; Make ivy stuff in minibuffer look pretty
-  (use-package ivy-rich
+  (use-package embark)
+
+  (use-package orderless
     :custom
-    (ivy-virtual-abbreviate 'name)
-    (ivy-rich-switch-buffer-align-virtual-buffer nil)
-    (ivy-rich-path-style 'name)
-    :config
-    (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line)
-    (setq ivy-rich-path-style 'abbrev
-          ivy-rich-display-transformers-list
-          '(ivy-switch-buffer
-            (:columns
-             ((ivy-rich-candidate (:width 20))
-              (ivy-rich-switch-buffer-size (:width 7 :align right))
-              (ivy-rich-switch-buffer-indicators
-               (:width 2 :face error :align right))
-              (ivy-rich-switch-buffer-major-mode (:width 12 :face warning))
-              (ivy-rich-switch-buffer-project (:width 8 :face success))
-              (ivy-rich-switch-buffer-path
-               (:width (lambda (x)
-                         (ivy-rich-switch-buffer-shorten-path
-                          x (ivy-rich-minibuffer-width 0.3))))))
-             :predicate (lambda (cand) (get-buffer cand)))
-            counsel-M-x
-            (:columns
-             ((counsel-M-x-transformer (:width 40))
-              (ivy-rich-counsel-function-docstring
-               (:face font-lock-doc-face))))
-            counsel-describe-function
-            (:columns
-             ((counsel-describe-function-transformer (:width 40))
-              (ivy-rich-counsel-function-docstring
-               (:face font-lock-doc-face))))
-            counsel-describe-variable
-            (:columns
-             ((counsel-describe-variable-transformer (:width 40))
-              (ivy-rich-counsel-variable-docstring
-               (:face font-lock-doc-face))))
-            counsel-recentf
-            (:columns
-             ((ivy-rich-candidate (:width 0.8))
-              (ivy-rich-file-last-modified-time
-               (:face font-lock-comment-face))))))
+    (completion-styles '(orderless))
+    (completion-category-defaults nil)    ; I want to be in control!
+    (completion-category-overrides
+     '((file (styles basic-remote ; For `tramp' hostname completion with `vertico'
+                     orderless
+                     ))
+       ))
 
-    (ivy-rich-mode))
+    (orderless-component-separator 'orderless-escapable-split-on-space)
+    (orderless-matching-styles
+     '(orderless-literal
+       orderless-prefixes
+       orderless-initialism
+       orderless-regexp
+       ;; orderless-flex
+       ;; orderless-strict-leading-initialism
+       ;; orderless-strict-initialism
+       ;; orderless-strict-full-initialism
+       ;; orderless-without-literal          ; Recommended for dispatches instead
+       ))
+    (orderless-style-dispatchers
+     '(prot-orderless-literal-dispatcher
+       prot-orderless-strict-initialism-dispatcher
+       prot-orderless-flex-dispatcher
+       ))
+    :init
+    (defun orderless--strict-*-initialism (component &optional anchored)
+      "Match a COMPONENT as a strict initialism, optionally ANCHORED.
+  The characters in COMPONENT must occur in the candidate in that
+  order at the beginning of subsequent words comprised of letters.
+  Only non-letters can be in between the words that start with the
+  initials.
+
+  If ANCHORED is `start' require that the first initial appear in
+  the first word of the candidate.  If ANCHORED is `both' require
+  that the first and last initials appear in the first and last
+  words of the candidate, respectively."
+      (orderless--separated-by
+       '(seq (zero-or-more alpha) word-end (zero-or-more (not alpha)))
+       (cl-loop for char across component collect `(seq word-start ,char))
+       (when anchored '(seq (group buffer-start) (zero-or-more (not alpha))))
+       (when (eq anchored 'both)
+         '(seq (zero-or-more alpha) word-end (zero-or-more (not alpha)) eol))))
+
+    (defun orderless-strict-initialism (component)
+      "Match a COMPONENT as a strict initialism.
+  This means the characters in COMPONENT must occur in the
+  candidate in that order at the beginning of subsequent words
+  comprised of letters.  Only non-letters can be in between the
+  words that start with the initials."
+      (orderless--strict-*-initialism component))
+
+    (defun prot-orderless-literal-dispatcher (pattern _index _total)
+      "Literal style dispatcher using the equals sign as a suffix.
+  It matches PATTERN _INDEX and _TOTAL according to how Orderless
+  parses its input."
+      (when (string-suffix-p "=" pattern)
+        `(orderless-literal . ,(substring pattern 0 -1))))
+
+    (defun prot-orderless-strict-initialism-dispatcher (pattern _index _total)
+      "Leading initialism  dispatcher using the comma suffix.
+  It matches PATTERN _INDEX and _TOTAL according to how Orderless
+  parses its input."
+      (when (string-suffix-p "," pattern)
+        `(orderless-strict-initialism . ,(substring pattern 0 -1))))
+
+    (defun prot-orderless-flex-dispatcher (pattern _index _total)
+      "Flex  dispatcher using the tilde suffix.
+  It matches PATTERN _INDEX and _TOTAL according to how Orderless
+  parses its input."
+      (when (string-suffix-p "." pattern)
+        `(orderless-flex . ,(substring pattern 0 -1))))
+    )
+
+  (use-package marginalia
+    :after vertico
+    :ensure t
+    :bind
+    (:map minibuffer-local-map
+          ("M-A" . marginalia-cycle))
+    :custom
+    (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
+    (marginalia-max-relative-age 0)
+    (marginalia-align 'right)
+    :init
+    (marginalia-mode))
 
 
-  ;; Prescient and ivy-prescient
-  (use-package prescient)
-  (use-package ivy-prescient
-    :config
-    (ivy-prescient-mode t))
-  ;; Ivy Hydra
-  (use-package ivy-hydra)
-
-
-  ;; UI Improvements
-  ;; Modeline, Theme and Icons
+  (use-package savehist
+    :init
+    (savehist-mode))
 
 #+end_src
 
@@ -391,10 +503,15 @@ The best support for a terminal provided in emacs is by vterm. This code segment
 
 *** All-the-icons - support for Dired as well as modeline file icon Support
 #+begin_src elisp
-  (use-package all-the-icons)
   (use-package all-the-icons-dired
     :after all-the-icons
     :hook (dired-mode . all-the-icons-dired-mode))
+
+  (use-package all-the-icons-completion
+  :after (marginalia all-the-icons)
+  :hook (marginalia-mode . all-the-icons-completion-marginalia-setup)
+  :init
+  (all-the-icons-completion-mode))
 #+end_src
 
 *** Miscellaneous Support
@@ -837,7 +954,7 @@ This is perhaps the most important section in the entire config file. This is be
 #+begin_src elisp
   ;; Org mode configuration
   (use-package org
-  	:straight (:type built-in)
+    :straight (:type built-in)
     :ensure t
     :defer nil
     :custom
@@ -1019,6 +1136,8 @@ This is perhaps the most important section in the entire config file. This is be
      ("C-x C-g" . deft-find-file))
     )
 
+  ;; Org contrib
+  (use-package org-contrib)
 #+end_src
 
 
