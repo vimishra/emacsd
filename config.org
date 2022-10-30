@@ -1176,6 +1176,7 @@ This is perhaps the most important section in the entire config file. This is be
   (setq org-roam-directory (file-truename "~/Documents/OrgNotes/roam"))
   ;; Configure org-roam
   (use-package org-roam
+    :demand t
     :straight (:host github :repo "org-roam/org-roam"
                      :files (:defaults "extensions/*"))
     :after org
@@ -1223,6 +1224,7 @@ This is perhaps the most important section in the entire config file. This is be
     (org-pretty-entities t)
     (org-modern-star '("◉" "○" "◈" "◇" "◇" "◇" "*"))
     (org-modern-priority nil)
+    (org-modern-todo nil)
 
     ;; Agenda styling
     (org-agenda-tags-column 0)
@@ -1244,7 +1246,8 @@ This is perhaps the most important section in the entire config file. This is be
     (deft-default-extension "org")
     (deft-extensions '("org"))
     (deft-directory "~/Documents/OrgNotes")
-    (deft-recursive t)
+    (deft-recursive nil)
+    (deft-recursive-ignore-dir-regexp "\\(?:\\.\\|\\.\\.|daily\\)$")
     (deft-use-filename-as-title nil)
     (deft-use-filter-string-for-filename t)
     (deft-file-naming-rules '((noslash . "-")
