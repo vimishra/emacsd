@@ -264,66 +264,108 @@ manage that.
     #+end_src
 
 *** Vertico, Orderless and Marginalia
-
-I was originally using Ivy mode to do my completions, but have moved to Vertico,
-orderless, marginalia and consult. Configuring this is a bit of a challenge but
-I have tried to copy/paste some configuration from some places. Let's hope this
-works.
+    Ivy is a fantastic completion framework. On it's own it is a bit plain, but
+    ivy-rich, counsel and prescient make it a pretty complete package. More
+    details can be found about ivy at [[https://github.com/abo-abo/swiper][Ivy Github Page]].
 
 
     #+begin_src elisp
-;; Enable vertico
-(use-package vertico
-  :init
-  (vertico-mode)
-  :custom
-  (vertico-count 15) ; Maximal number of candidates to show
-  (vertico-resize t) ; Grow and shrink vertico window
-  (vertico-cycle t)  ; Enable cycling for vertico-next/vertico-previous
-  )
+      ;; =======================================================
+      ;; Ivy command completion framework
+      ;; Ivy, Ivy Rich, Counsel and Swiper
+      ;; =======================================================
+      (use-package ivy
+        :diminish
+        :custom
+        (ivy-height 15)
+        (ivy-count-format "(%d/%d) ")
+        (ivy-use-virtual-buffers t)
+        (ivy-use-selectable-prompt t)
+        :config
+        (ivy-mode 1)
 
-;; Persist history over Emacs restarts. Vertico sorts by history position.
-(use-package savehist
-  :init
-  (savehist-mode))
+        :bind (("C-c C-r" . #'ivy-resume)
+               ("C-c s"   . #'swiper-thing-at-point)
+               ("C-s"     . #'swiper)))
 
-;; A few more useful configurations...
-(use-package emacs
-  :init
-  ;; Add prompt indicator to `completing-read-multiple'.
-  ;; We display [CRM<separator>], e.g., [CRM,] if the separator is a comma.
-  (defun crm-indicator (args)
-    (cons (format "[CRM%s] %s"
-                  (replace-regexp-in-string
-                   "\\`\\[.*?]\\*\\|\\[.*?]\\*\\'" ""
-                   crm-separator)
-                  (car args))
-          (cdr args)))
-  (advice-add #'completing-read-multiple :filter-args #'crm-indicator)
+      ;; Counsel package
+      (use-package counsel
+        :init
+        (counsel-mode 1)
 
-  ;; Do not allow the cursor in the minibuffer prompt
-  (setq minibuffer-prompt-properties
-        '(read-only t cursor-intangible t face minibuffer-prompt))
-  (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
+        :bind (("C-x C-m" . #'counsel-M-x)
+               ("C-c U" . #'counsel-unicode-char)
+               ("C-c i" . #'counsel-imenu)
+               ("C-x f" . #'counsel-find-file)
+               ("C-c y" . #'counsel-yank-pop)
+               ("C-c r" . #'counsel-recentf)
+               ("C-c v" . #'counsel-switch-buffer-other-window)
+               ("C-h h" . #'counsel-command-history)
+               ("C-h f" . #'counsel-describe-function)
+               ("C-h v" . #'counsel-describe-variable)
+               ("C-x C-f" . #'counsel-find-file)
+               :map ivy-minibuffer-map
+               ("C-r" . counsel-minibuffer-history))
+        :diminish)
 
-  ;; Emacs 28: Hide commands in M-x which do not work in the current mode.
-  ;; Vertico commands are hidden in normal buffers.
-  ;; (setq read-extended-command-predicate
-  ;;       #'command-completion-default-include-p)
+      (use-package counsel-projectile
+        :bind (("C-c f" . #'counsel-projectile)
+               ("C-c F" . #'counsel-projectile-switch-project)))
 
-  ;; Enable recursive minibuffers
-  (setq enable-recursive-minibuffers t))
+      ;; Make ivy stuff in minibuffer look pretty
+      (use-package ivy-rich
+        :custom
+        (ivy-virtual-abbreviate 'name)
+        (ivy-rich-switch-buffer-align-virtual-buffer nil)
+        (ivy-rich-path-style 'name)
+        :config
+        (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line)
+        (setq ivy-rich-path-style 'abbrev
+              ivy-rich-display-transformers-list
+              '(ivy-switch-buffer
+                (:columns
+                 ((ivy-rich-candidate (:width 40))
+                  (ivy-rich-switch-buffer-size (:width 7 :align right))
+                  (ivy-rich-switch-buffer-indicators
+                   (:width 2 :face error :align right))
+                  (ivy-rich-switch-buffer-major-mode (:width 12 :face warning))
+                  (ivy-rich-switch-buffer-project (:width 8 :face success))
+                  (ivy-rich-switch-buffer-path
+                   (:width (lambda (x)
+                             (ivy-rich-switch-buffer-shorten-path
+                              x (ivy-rich-minibuffer-width 0.3))))))
+                 :predicate (lambda (cand) (get-buffer cand)))
+                counsel-M-x
+                (:columns
+                 ((counsel-M-x-transformer (:width 60))
+                  (ivy-rich-counsel-function-docstring
+                   (:face font-lock-doc-face))))
+                counsel-describe-function
+                (:columns
+                 ((counsel-describe-function-transformer (:width 60))
+                  (ivy-rich-counsel-function-docstring
+                   (:face font-lock-doc-face))))
+                counsel-describe-variable
+                (:columns
+                 ((counsel-describe-variable-transformer (:width 60))
+                  (ivy-rich-counsel-variable-docstring
+                   (:face font-lock-doc-face))))
+                counsel-recentf
+                (:columns
+                 ((ivy-rich-candidate (:width 0.8))
+                  (ivy-rich-file-last-modified-time
+                   (:face font-lock-comment-face))))))
+
+        (ivy-rich-mode))
 
 
-;; Optionally use the `orderless' completion style.
-(use-package orderless
-  :init
-  ;; Configure a custom style dispatcher (see the Consult wiki)
-  ;; (setq orderless-style-dispatchers '(+orderless-dispatch)
-  ;;       orderless-component-separator #'orderless-escapable-split-on-space)
-  (setq completion-styles '(orderless basic)
-        completion-category-defaults nil
-        completion-category-overrides '((file (styles partial-completion)))))
+      ;; Prescient and ivy-prescient
+      (use-package prescient)
+      (use-package ivy-prescient
+        :config
+        (ivy-prescient-mode t))
+      ;; Ivy Hydra
+      (use-package ivy-hydra)
 #+end_src
 
 *** Support for Terminal - vterm
@@ -998,19 +1040,17 @@ This is perhaps the most important section in the entire config file. This is be
 *** Helpful
 Helpul mode for expanded help functions.
     #+begin_src elisp
-  (use-package helpful
-    :bind
-    (("C-h f" . helpful-callable)
-     ("C-h v" . helpful-variable)
-     ("C-h k" . helpful-key)
-     ("C-c C-d" . helpful-at-point)
-     ("C-h F" . helpful-function)
-     ("C-h C" . helpful-comman)
-     )
-    :config
-    (setq counsel-describe-function-function #'helpful-callable)
-    (setq counsel-describe-variable-function #'helpful-variable)
-    )
+      (use-package helpful
+        :bind
+        (("C-h k" . helpful-key)
+         ("C-c C-d" . helpful-at-point)
+         ("C-h F" . helpful-function)
+         ("C-h C" . helpful-comman)
+         )
+        :config
+        (setq counsel-describe-function-function #'helpful-callable)
+        (setq counsel-describe-variable-function #'helpful-variable)
+        )
     #+end_src
 
 *** Favorite Color Theme - Tommorrow Night Bright
