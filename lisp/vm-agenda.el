@@ -175,11 +175,11 @@ If nil it defaults to `split-string-default-separators', normally
 ;; In addition, it truncates it to 30 chars. Which ought to be more than enough to get an idea of the title
 ;; as well as look pretty.
 ;; https://d12frosted.io/posts/2020-06-24-task-management-with-roam-vol2.html
-(setq org-agenda-prefix-format
-      '((agenda . " %i %(vulpea-agenda-category 30)%?-30t% s")
-        (todo . " %i %(vulpea-agenda-category 30) ")
-        (tags . " %i %(vulpea-agenda-category 30) ")
-        (search . " %i %(vulpea-agenda-category 30) ")))
+ (setq org-agenda-prefix-format
+      '((agenda . " %i %-12(vulpea-agenda-category 20)%?-12t% s")
+        (todo . " %i %-12(vulpea-agenda-category 20) %-22(org-entry-get nil \"DEADLINE\") % s ")
+        (tags . " %i %-12(vulpea-agenda-category 20) % s")
+        (search . " %i %-12(vulpea-agenda-category 20) % s")))
 
 (defun vulpea-agenda-category (&optional len)
   "Get category of item at point for agenda.

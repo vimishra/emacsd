@@ -115,24 +115,24 @@ I want to increase my GC threshold here so the emacs doesn't keep on doing
 Garbage collection again and again.
 
     #+begin_src elisp
-  ;; Using garbage magic hack.
-  (use-package gcmh
-    :config
-    (gcmh-mode 1))
-  ;; Setting garbage collection threshold
-  (setq gc-cons-threshold (* 400 1024 1024)
-        gc-cons-percentage 0.6)
+      ;; Using garbage magic hack.
+      (use-package gcmh
+        :config
+        (gcmh-mode 1)
+        ;; Setting garbage collection threshold
+        (setq gc-cons-threshold (* 400 1024 1024)
+              gc-cons-percentage 0.6)
 
-  ;; Profile emacs startup
-  (add-hook 'emacs-startup-hook
-            (lambda ()
-              (message "*** Emacs loaded in %s with %d garbage collections."
-                       (format "%.2f seconds" (float-time (time-subtract after-init-time
-                                                                         before-init-time)))
-                       gcs-done)))
+        ;; Profile emacs startup
+        (add-hook 'emacs-startup-hook
+                  (lambda ()
+                    (message "*** Emacs loaded in %s with %d garbage collections."
+                             (format "%.2f seconds" (float-time (time-subtract after-init-time
+                                                                               before-init-time)))
+                             gcs-done)))
 
-  ;; Silence compiler warnings as they can be pretty disruptive
-  (setq comp-async-report-warnings-errors nil)
+        ;; Silence compiler warnings as they can be pretty disruptive
+        (setq comp-async-report-warnings-errors nil))
     #+end_src
 
 We need to also setup some basic defaults for Emacs to make it more
@@ -149,7 +149,7 @@ productive. Here are these - most of them are pretty self explanatory.
    frame-title-format '("" "[%b] - Emacs " emacs-version)     ;; Set a more intuitive title for emacs
    create-lockfile nil                                        ;; Do not create lockfile
    indent-tabs-mode nil                                       ;; Don't use hard tabs
-   custom-file "~/.emacs.d/custom-file.el"                    ;; Name of the custom file
+   custom-file "~/.emacs.custom/custom-file.el"                    ;; Name of the custom file
    auto-save-default nil                                      ;; Do I want autosave - for the time being no.
    enable-recursive-minibuffers t                             ;; Allow commands to be run on minibuffer
    x-select-enable-clipboard t                                ;; Makes killing/yanking interact with the clipboard.
@@ -265,10 +265,8 @@ manage that.
     #+end_src
 
 *** Vertico, Orderless and Marginalia
-    Ivy is a fantastic completion framework. On it's own it is a bit plain, but
-    ivy-rich, counsel and prescient make it a pretty complete package. More
-    details can be found about ivy at [[https://github.com/abo-abo/swiper][Ivy Github Page]].
-
+Have setup this for use with vertico. Vertico is the new completion framework that I am trying after using helm and ivy for
+many years. So far it looks pretty promising. Let's see how this goes. Most of this configuration is stolen from the web.
 
     #+begin_src elisp
       (use-package marginalia
@@ -686,7 +684,7 @@ Support for searching programs.
   (use-package ripgrep)
   ;; Deadgrep is the best way to search in a repo
   (use-package deadgrep
-    :bind (("C-c h" . #'deadgrep)))
+    :bind (("C-c r" . #'deadgrep)))
   ;; Visual reegular expressions. This is the boss
   (use-package visual-regexp
     :bind (("C-c 5" . #'vr/replace)))
@@ -1283,10 +1281,11 @@ Helpul mode for expanded help functions.
 
 *** Favorite Color Theme - Tommorrow Night Bright
     #+begin_src elisp
-  (use-package color-theme-sanityinc-tomorrow
-    :ensure t
-    :defer t)
-  (load-theme 'sanityinc-tomorrow-bright t)
+      ; (use-package color-theme-sanityinc-tomorrow
+      (use-package doom-themes
+        :ensure t
+        :defer t)
+      (load-theme 'doom-ir-black t)
     #+end_src
 
 *** Final UI - font
